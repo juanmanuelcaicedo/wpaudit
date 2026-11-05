@@ -192,8 +192,9 @@ def vulnerability_finding(label: str, vulns: list, version_known: bool = True) -
         title=f"{label}: {amount}{' por confirmar' if not version_known else ''}",
         severity=severity, category="Vulnerabilidades conocidas", description=description,
         business_impact="Hay fallos públicos que pueden facilitar el compromiso del sitio; algunos pueden tener exploit disponible.",
-        recommendation=(f"Actualice a la versión {target} o superior" if target else "Actualice a la última versión")
-                       + " o elimine el componente si no es imprescindible.",
+        recommendation=("Actualice WordPress a la última versión estable." if label.startswith("WordPress") else
+                        (f"Actualice a la versión {target} o superior" if target else "Actualice a la última versión")
+                        + " o elimine el componente si no es imprescindible."),
         references=references, effort="Medio", source="wpscan", evidence=shown)
 
 

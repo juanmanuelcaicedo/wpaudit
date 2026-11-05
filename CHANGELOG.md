@@ -1,5 +1,12 @@
 # Cambios
 
+## 1.3.0
+
+Primera versión pública recomendada, probada en Kali Linux contra el laboratorio DVWP.
+
+- Para WordPress, recomienda la última versión estable en lugar de un parche antiguo de su rama.
+- Reúne las mejoras de 1.2.x: informes rediseñados, mejor detección de plugins, vulnerabilidades agrupadas y un instalador que no actualiza el sistema.
+
 ## 1.2.4
 
 - Agrupa por componente las vulnerabilidades conocidas para que el informe se pueda priorizar.

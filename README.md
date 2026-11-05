@@ -1,5 +1,10 @@
 # wpaudit
 
+[![CI](https://github.com/juanmanuelcaicedo/wpaudit/actions/workflows/ci.yml/badge.svg)](https://github.com/juanmanuelcaicedo/wpaudit/actions/workflows/ci.yml)
+[![Licencia: MIT](https://img.shields.io/badge/Licencia-MIT-16a34a)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
+[![Kali Linux](https://img.shields.io/badge/Probado%20en-Kali%20Linux-557C94?logo=kalilinux&logoColor=white)](#probado-en-un-laboratorio)
+
 **Audita tu WordPress sin atacarlo y recibe un informe que Gerencia entiende y TI puede ejecutar.**
 
 *Non-intrusive WordPress security audit for Kali Linux with executive and technical reports (reports in Spanish).*
@@ -26,6 +31,22 @@ wpaudit https://misitio.com --authorized --client "Mi Empresa" --auditor "Tu Nom
 ![Informe ejecutivo de wpaudit con datos simulados](docs/images/informe-ejecutivo.png)
 
 Mira un resultado de ejemplo, con datos simulados: informe ejecutivo ([HTML](docs/demo/informe_ejecutivo.html), [PDF](docs/demo/informe_ejecutivo.pdf)) e informe técnico ([HTML](docs/demo/informe_tecnico.html), [PDF](docs/demo/informe_tecnico.pdf)). Descarga los HTML y ábrelos en tu navegador.
+
+## Probado en un laboratorio
+
+Lo probé en Kali Linux contra [DVWP](https://github.com/vavkamil/dvwp), un WordPress vulnerable a propósito que corre en tu propio equipo:
+
+- Detectó WordPress 5.3 y los plugins vulnerables del laboratorio con su versión, incluidos los que no aparecen en el HTML público.
+- Con un token de WPScan, agrupó 142 vulnerabilidades conocidas en 7 hallazgos priorizados.
+- Ejecutó WhatWeb, WPScan, Nmap y Nikto, y generó los informes HTML, PDF, JSON y CSV.
+
+SSLScan y el análisis de TLS aún no se han probado en un sitio HTTPS real. Si lo pruebas, [cuéntame cómo te fue](https://github.com/juanmanuelcaicedo/wpaudit/issues).
+
+Para repetir la prueba, sigue la guía de DVWP y **no expongas ese laboratorio a internet**:
+
+```bash
+wpaudit http://127.0.0.1:31337 --authorized --profile standard
+```
 
 ## Elige un perfil
 

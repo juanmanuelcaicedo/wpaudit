@@ -311,3 +311,8 @@ def test_vulnerabilities_are_grouped_by_component():
 def test_unknown_version_only_reports_possible_vulnerabilities():
     finding = external.vulnerability_finding("Plugin demo", [{"title": "Unauthenticated RCE"}], version_known=False)
     assert finding.severity == "low" and "por confirmar" in finding.title
+
+
+def test_wordpress_recommends_latest_stable_instead_of_branch_patch():
+    finding = external.vulnerability_finding("WordPress 5.3", [{"title": "XSS", "fixed_in": "5.3.27"}])
+    assert "última versión estable" in finding.recommendation and "5.3.27" not in finding.recommendation
