@@ -278,3 +278,36 @@ def test_wpscan_does_not_inherit_the_token_variable(tmp_path, monkeypatch):
     result = AuditResult("http://x", "x", "2026-01-01T00:00:00")
     external.run_wpscan("http://x", None, result, tmp_path, 5)
     assert "WPSCAN_API_TOKEN" not in seen["env"]
+
+
+@pytest.mark.parametrize("title, expected", [
+    ("Social Warfare <= 3.5.2 - Unauthenticated Remote Code Execution (RCE)", "critical"),
+    ("InfiniteWP Client < 1.9.4.5 - Authentication Bypass", "critical"),
+    ("WP < 7.1.4 - Unauthenticated RCE During Core Update", "critical"),
+    ("WP-Advanced-Search < 3.3.9.2 - Unauthenticated SQL Injection", "high"),
+    ("WP < 7.0.4 - Author+ RCE via PDF Upload", "high"),
+    ("WP < 7.1.3 - Unauthenticated Stored XSS via Comment Moderation", "medium"),
+    ("WP < 7.1.3 - Contributor+ Stored XSS via Imgur Embed", "medium"),
+    ("InfiniteWP Client < 1.13.10 - Authenticated (Administrator+) SQL Injection", "low"),
+    ("WordPress < 6.4.3 - Admin+ PHP File Upload", "low"),
+])
+def test_severity_is_estimated_from_title_without_cvss(title, expected):
+    assert external.estimate_severity({"title": title}) == expected
+
+
+def test_cvss_wins_over_the_title():
+    assert external.estimate_severity({"title": "Unauthenticated RCE", "cvss": {"score": "5.0"}}) == "medium"
+
+
+def test_vulnerabilities_are_grouped_by_component():
+    vulns = [{"title": "Contributor+ XSS", "fixed_in": "2.0"},
+             {"title": "Unauthenticated RCE", "fixed_in": "3.10", "references": {"cve": ["2020-1"]}}]
+    finding = external.vulnerability_finding("Plugin demo", vulns)
+    assert finding.severity == "critical" and "2 vulnerabilidades" in finding.title
+    assert finding.evidence[0].startswith("[Crítica]") and "3.10" in finding.recommendation
+    assert "https://nvd.nist.gov/vuln/detail/CVE-2020-1" in finding.references
+
+
+def test_unknown_version_only_reports_possible_vulnerabilities():
+    finding = external.vulnerability_finding("Plugin demo", [{"title": "Unauthenticated RCE"}], version_known=False)
+    assert finding.severity == "low" and "por confirmar" in finding.title

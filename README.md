@@ -40,11 +40,16 @@ Mira un resultado de ejemplo, con datos simulados: informe ejecutivo ([HTML](doc
 El repositorio no incluye ningún token: cada persona usa el suyo. Es opcional, pero sin él los informes dejan constancia de que las vulnerabilidades conocidas de plugins y temas **no se evaluaron**.
 
 1. Crea una cuenta en [wpscan.com](https://wpscan.com) y copia tu token desde tu [perfil](https://wpscan.com/profile). Revisa allí los límites de tu plan.
-2. Guárdalo en un archivo privado de tu equipo. El token no se muestra mientras lo escribes:
+2. Pide el token en una línea aparte. Pégala sola, pulsa Enter, pega el token y pulsa Enter otra vez; no se mostrará:
+
+   ```bash
+   printf 'Token de WPScan: '; read -rs T; echo
+   ```
+
+   Después guárdalo en un archivo privado de tu equipo:
 
    ```bash
    install -m 600 /dev/null ~/.wpaudit.env
-   printf 'Token de WPScan: '; read -rs T; echo
    printf "export WPSCAN_API_TOKEN='%s'\n" "$T" > ~/.wpaudit.env; unset T
    ```
 

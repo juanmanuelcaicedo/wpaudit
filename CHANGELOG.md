@@ -1,5 +1,11 @@
 # Cambios
 
+## 1.2.4
+
+- Agrupa por componente las vulnerabilidades conocidas para que el informe se pueda priorizar.
+- Sin CVSS, estima la gravedad por el título y lo indica; ya no marca todo como medio.
+- Si no se confirma la versión de un componente, sus vulnerabilidades quedan por confirmar y en gravedad baja.
+
 ## 1.2.3
 
 - La guía del token funciona en `zsh`, el shell predeterminado de Kali, y en `bash`.

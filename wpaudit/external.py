@@ -136,6 +136,67 @@ def run_sslscan(host: str, port: int, result: AuditResult, raw: Path, timeout: i
     _log_run(result, "sslscan", "ok" if rc == 0 else f"rc={rc}", " ".join(cmd), secs)
 
 
+_SEVERITY_ES = {"critical": "Crítica", "high": "Alta", "medium": "Media", "low": "Baja", "info": "Informativa"}
+_SEVERITY_ORDER = ("critical", "high", "medium", "low", "info")
+_ANON = re.compile(r"unauth|authentication bypass|auth bypass", re.I)
+_ADMIN_ONLY = re.compile(r"\b(super )?admin(istrator)?\+|\(admin(istrator)?\+?\)|super admin", re.I)
+_TAKEOVER = re.compile(r"\brce\b|remote code|code execution|account takeover|authentication bypass|auth bypass|arbitrary file upload", re.I)
+_DATA = re.compile(r"sql injection|sqli|\blfi\b|file inclusion|traversal|database access|sensitive information|file overwrite", re.I)
+
+
+def estimate_severity(vuln: dict) -> str:
+    """Usa el CVSS si existe; si no, estima la gravedad por lo que dice el título."""
+    try:
+        score = float((vuln.get("cvss") or {}).get("score"))
+    except (TypeError, ValueError):
+        score = None
+    if score is not None:
+        return "critical" if score >= 9 else "high" if score >= 7 else "medium" if score >= 4 else "low"
+    title = str(vuln.get("title", ""))
+    if _ADMIN_ONLY.search(title):
+        return "low"
+    if _ANON.search(title):
+        if _TAKEOVER.search(title):
+            return "critical"
+        return "high" if _DATA.search(title) else "medium"
+    return "high" if _TAKEOVER.search(title) else "medium"
+
+
+def vulnerability_finding(label: str, vulns: list, version_known: bool = True) -> Finding | None:
+    """Agrupa en un solo hallazgo las vulnerabilidades conocidas de un componente."""
+    if not vulns:
+        return None
+    rated = sorted(((estimate_severity(v), v) for v in vulns), key=lambda item: _SEVERITY_ORDER.index(item[0]))
+    severity = rated[0][0] if version_known else "low"
+    evidence, references = [], []
+    for sev, v in rated:
+        fixed = v.get("fixed_in") or "sin parche conocido"
+        evidence.append(f"[{_SEVERITY_ES[sev]}] {v.get('title', 'Vulnerabilidad conocida')} (corregida en: {fixed})")
+        refs = v.get("references") or {}
+        for cve in refs.get("cve", []):
+            references.append(f"https://nvd.nist.gov/vuln/detail/{cve if str(cve).startswith('CVE') else 'CVE-' + str(cve)}")
+        references.extend(refs.get("url", [])[:1])
+    references = list(dict.fromkeys(references))[:6]
+    shown = evidence[:30]
+    if len(evidence) > 30:
+        shown.append(f"... y {len(evidence) - 30} más en raw/wpscan.json")
+    fixes = [v["fixed_in"] for v in vulns if v.get("fixed_in")]
+    target = max(fixes, key=lambda x: tuple(int(i) for i in re.findall(r"\d+", str(x))[:4])) if fixes else None
+    amount = f"{len(vulns)} {'vulnerabilidad conocida' if len(vulns) == 1 else 'vulnerabilidades conocidas'}"
+    description = (f"WPScan reporta {amount} en {label}. Cuando la base de datos no trae CVSS, "
+                   "la gravedad se estima por el título; confírmela antes de priorizar.")
+    if not version_known:
+        description += " No se pudo confirmar la versión instalada: algunas pueden no aplicar, por lo que este hallazgo queda en gravedad baja hasta verificarla."
+    return Finding(
+        id=f"VULN-{label.split(' ')[0]}-{label.split(' ')[1] if ' ' in label and label.split(' ')[0] != 'WordPress' else 'core'}"[:90],
+        title=f"{label}: {amount}{' por confirmar' if not version_known else ''}",
+        severity=severity, category="Vulnerabilidades conocidas", description=description,
+        business_impact="Hay fallos públicos que pueden facilitar el compromiso del sitio; algunos pueden tener exploit disponible.",
+        recommendation=(f"Actualice a la versión {target} o superior" if target else "Actualice a la última versión")
+                       + " o elimine el componente si no es imprescindible.",
+        references=references, effort="Medio", source="wpscan", evidence=shown)
+
+
 def merge_wpscan_plugins(result: AuditResult, data: dict) -> None:
     """Agrega al inventario los plugins que solo encontró WPScan."""
     plugins = result.meta.setdefault("plugins", [])
@@ -196,17 +257,6 @@ def run_wpscan(url: str, token: str | None, result: AuditResult, raw: Path, time
     vulns_total = 0
     vulns_skipped = 0
 
-    def sev_from(v: dict) -> str:
-        score = None
-        cv = v.get("cvss") or {}
-        try:
-            score = float(cv.get("score"))
-        except (TypeError, ValueError):
-            pass
-        if score is None:
-            return "medium"  # sin CVSS no se puede afirmar gravedad alta
-        return "critical" if score >= 9 else "high" if score >= 7 else "medium" if score >= 4 else "low"
-
     def _own_version(kind: str, slug: str):
         """Versión detectada por el motor nativo de wpaudit (sin el sufijo '(estimada)')."""
         for it in result.meta.get(kind, []) or []:
@@ -221,24 +271,17 @@ def run_wpscan(url: str, token: str | None, result: AuditResult, raw: Path, time
     def add_vulns(label: str, vulns: list, installed=None) -> None:
         nonlocal vulns_total, vulns_skipped
         inst = _vt(installed)
+        pending = []
         for v in vulns or []:
             fixed = _vt(v.get("fixed_in"))
             if inst and fixed and inst >= fixed:
                 vulns_skipped += 1  # ya corregida en la versión detectada
                 continue
-            vulns_total += 1
-            cves = (v.get("references") or {}).get("cve", [])
-            ident = (cves[0] if cves else str(v.get("title", ""))[:40]).replace(" ", "_")
-            result.add(Finding(
-                id=f"VULN-{label}-{ident}"[:90], title=f"{label}: {v.get('title', 'vulnerabilidad conocida')}",
-                severity=sev_from(v), category="Vulnerabilidades conocidas",
-                description=f"WPScan reporta una vulnerabilidad conocida en {label}.",
-                business_impact="Vulnerabilidad pública con posible exploit disponible; puede permitir compromiso del sitio.",
-                recommendation=("Actualice a la versión corregida" + (f" ({v['fixed_in']})" if v.get("fixed_in") else "")
-                                + " o elimine el componente si no es imprescindible."),
-                references=[f"https://nvd.nist.gov/vuln/detail/{c}" for c in [f"CVE-{x}" if not str(x).startswith("CVE") else x for x in cves]][:4]
-                           + [u for u in (v.get("references") or {}).get("url", [])[:2]],
-                effort="Medio", source="wpscan", evidence=[f"Corregida en: {v.get('fixed_in', 'sin parche conocido')}"]))
+            pending.append(v)
+        vulns_total += len(pending)
+        finding = vulnerability_finding(label, pending, version_known=inst is not None)
+        if finding:
+            result.add(finding)
 
     merge_wpscan_plugins(result, data)
     ver = data.get("version") or {}
