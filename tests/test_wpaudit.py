@@ -1,9 +1,13 @@
+import os
+import subprocess
+import sys
+from pathlib import Path
 import json
 import stat
 
 import pytest
 
-from wpaudit import checks, external
+from wpaudit import __version__, checks, external
 from wpaudit.cli import main
 from wpaudit.models import AuditResult, Finding
 from wpaudit.report import write_reports
@@ -203,3 +207,48 @@ def test_sslscan_is_reported_as_skipped_on_http(tmp_path):
     result = AuditResult("http://127.0.0.1", "127.0.0.1", "2026-01-01T00:00:00")
     external.run_external(result, "http://127.0.0.1", ["sslscan"], tmp_path, None, 5, lambda _m: None)
     assert result.tool_runs[0]["status"] == "omitida"
+
+
+def _stub(folder, name, body):
+    path = folder / name
+    path.write_text("#!/usr/bin/env bash\n" + body + "\n")
+    path.chmod(0o755)
+
+
+def _run_install(tmp_path, apt_body="exit 0"):
+    stubs = tmp_path / "stubs"
+    stubs.mkdir()
+    log = tmp_path / "apt.log"
+    _stub(stubs, "sudo", 'exec "$@"')
+    _stub(stubs, "apt", f'echo "$*" >> {log}\n{apt_body}')
+    _stub(stubs, "dpkg-query", 'case "$*" in *python3*|*nmap*) printf "install ok installed";; *) exit 1;; esac')
+    env = {**os.environ, "PATH": f"{stubs}:{os.environ['PATH']}", "WPAUDIT_HOME": str(tmp_path / "opt"),
+           "WPAUDIT_BIN": str(tmp_path / "wpaudit")}
+    root = Path(__file__).resolve().parent.parent
+    done = subprocess.run(["bash", str(root / "install.sh")], env=env, capture_output=True, text=True)
+    return done, log.read_text()
+
+
+def test_install_only_requests_missing_packages_without_upgrades(tmp_path):
+    done, calls = _run_install(tmp_path)
+    assert done.returncode == 0, done.stderr
+    assert "nmap" not in calls and "python3" not in calls
+    assert "install -y --no-upgrade wpscan" in calls
+
+
+def test_install_finishes_when_an_optional_package_fails(tmp_path):
+    done, _calls = _run_install(tmp_path, 'case "$*" in *wpscan*) exit 100;; esac')
+    assert done.returncode == 0, done.stderr
+    assert "No se pudieron instalar: wpscan" in done.stdout
+    assert (tmp_path / "opt" / "wpaudit" / "__init__.py").exists()
+
+
+@pytest.mark.skipif(sys.version_info < (3, 11), reason="PYTHONSAFEPATH requiere Python 3.11")
+def test_installed_command_ignores_a_wpaudit_folder_in_the_current_directory(tmp_path):
+    done, _calls = _run_install(tmp_path)
+    assert done.returncode == 0, done.stderr
+    fake = tmp_path / "cwd" / "wpaudit"
+    fake.mkdir(parents=True)
+    (fake / "__main__.py").write_text("print('carpeta local')")
+    out = subprocess.run([str(tmp_path / "wpaudit"), "--version"], cwd=fake.parent, capture_output=True, text=True).stdout
+    assert "carpeta local" not in out and __version__ in out

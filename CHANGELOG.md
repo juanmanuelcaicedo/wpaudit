@@ -1,5 +1,11 @@
 # Cambios
 
+## 1.2.2
+
+- `install.sh` solo instala lo que falta y ya no actualiza paquetes del sistema.
+- Si falla una herramienta opcional, wpaudit se instala igual y avisa cuál faltó.
+- El comando `wpaudit` ignora una carpeta `wpaudit/` en el directorio actual.
+
 ## 1.2.1
 
 - Detecta plugins comunes que no aparecen en el HTML público, revisando su `readme.txt`.
