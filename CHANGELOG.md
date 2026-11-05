@@ -1,5 +1,11 @@
 # Cambios
 
+## 1.2.3
+
+- La guía del token funciona en `zsh`, el shell predeterminado de Kali, y en `bash`.
+- Un `WPSCAN_API_TOKEN` vacío o rechazado ya no hace abortar a WPScan.
+- Omitir SSLScan en un sitio HTTP ya no marca la evaluación como parcial.
+
 ## 1.2.2
 
 - `install.sh` solo instala lo que falta y ya no actualiza paquetes del sistema.

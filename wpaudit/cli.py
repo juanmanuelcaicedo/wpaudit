@@ -130,7 +130,7 @@ def main(argv=None) -> int:
             log("[!] Herramientas externas interrumpidas.")
             result.cover("Herramientas externas", "parcial", "Fueron interrumpidas antes de terminar.")
     for run in result.tool_runs:
-        if run["status"] != "ok":
+        if run["status"] not in ("ok", "omitida"):
             result.cover(f"Herramienta {run['tool']}", "no evaluada", run["status"])
     if "Vulnerabilidades conocidas (CVE)" not in result.coverage:
         result.cover("Vulnerabilidades conocidas (CVE)", "no evaluada",

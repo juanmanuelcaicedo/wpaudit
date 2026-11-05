@@ -43,7 +43,7 @@ def test_low_findings_keep_the_plain_sum():
 def test_token_is_never_saved(tmp_path, monkeypatch, payload):
     secret = "SECRETO123"
 
-    def fake_run(_cmd, _timeout):
+    def fake_run(_cmd, _timeout, env=None):
         (tmp_path / "wpscan.json").write_text(json.dumps(payload))
         return 4, f"--api-token {secret}", "", 1.0
 
@@ -252,3 +252,29 @@ def test_installed_command_ignores_a_wpaudit_folder_in_the_current_directory(tmp
     (fake / "__main__.py").write_text("print('carpeta local')")
     out = subprocess.run([str(tmp_path / "wpaudit"), "--version"], cwd=fake.parent, capture_output=True, text=True).stdout
     assert "carpeta local" not in out and __version__ in out
+
+
+def test_blank_token_is_not_sent_to_wpscan(tmp_path, monkeypatch):
+    monkeypatch.setenv("WPSCAN_API_TOKEN", "  ")
+    seen = {}
+
+    def fake_wpscan(_url, token, *_args, **_kwargs):
+        seen["token"] = token
+    monkeypatch.setattr(external, "run_wpscan", fake_wpscan)
+    result = AuditResult("http://127.0.0.1", "127.0.0.1", "2026-01-01T00:00:00")
+    external.run_external(result, "http://127.0.0.1", ["wpscan"], tmp_path, None, 5, lambda _m: None)
+    assert seen["token"] is None
+
+
+def test_wpscan_does_not_inherit_the_token_variable(tmp_path, monkeypatch):
+    monkeypatch.setenv("WPSCAN_API_TOKEN", "secreto")
+    monkeypatch.setattr(external.shutil, "which", lambda _n: "/bin/wpscan")
+    seen = {}
+
+    def fake_run(_cmd, _timeout, env=None):
+        seen["env"] = env
+        return 1, "", "", 0.1
+    monkeypatch.setattr(external, "_run", fake_run)
+    result = AuditResult("http://x", "x", "2026-01-01T00:00:00")
+    external.run_wpscan("http://x", None, result, tmp_path, 5)
+    assert "WPSCAN_API_TOKEN" not in seen["env"]

@@ -60,10 +60,10 @@ def _log_run(result: AuditResult, name: str, status: str, cmd: str = "", seconds
                              "seconds": round(seconds, 1), "note": redact(note)})
 
 
-def _run(cmd: list, timeout: int):
+def _run(cmd: list, timeout: int, env: dict | None = None):
     t0 = time.time()
     try:
-        p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=env)
         return p.returncode, ANSI.sub("", p.stdout), ANSI.sub("", p.stderr), time.time() - t0
     except subprocess.TimeoutExpired as exc:
         out = (exc.stdout.decode("utf-8", "replace") if isinstance(exc.stdout, bytes) else exc.stdout) or ""
@@ -163,7 +163,9 @@ def run_wpscan(url: str, token: str | None, result: AuditResult, raw: Path, time
         # Sin token WPScan se niega a enumerar plugins/temas vulnerables (vp,vt): se piden solo
         # plugins/temas populares, copias de config, volcados de BD y usuarios, que no requieren API.
         cmd += ["--enumerate", "p,t" if light else "p,t,cb,dbe,u"]
-    rc, out, err, secs = _run(cmd, timeout)
+    # WPScan también lee esta variable: el token solo se le pasa de forma explícita
+    env = {k: v for k, v in os.environ.items() if k != "WPSCAN_API_TOKEN"}
+    rc, out, err, secs = _run(cmd, timeout, env)
     _save(raw, "wpscan.stderr.txt", out + err)
     try:
         data = json.loads(out_file.read_text())
@@ -382,7 +384,7 @@ def run_external(result: AuditResult, base_url: str, tools: list, out_dir: Path,
     except OSError:
         result.note("No se pudo resolver el nombre de host para las herramientas externas.")
         return
-    token = wpscan_token or os.environ.get("WPSCAN_API_TOKEN")
+    token = (wpscan_token or os.environ.get("WPSCAN_API_TOKEN") or "").strip() or None
     for tool in tools:
         if tool == "sslscan" and p.scheme != "https":
             log("[i] Herramienta externa omitida: sslscan (el sitio no usa HTTPS)")

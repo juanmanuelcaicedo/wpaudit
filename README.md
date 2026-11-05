@@ -44,7 +44,7 @@ El repositorio no incluye ningún token: cada persona usa el suyo. Es opcional, 
 
    ```bash
    install -m 600 /dev/null ~/.wpaudit.env
-   read -rsp 'Token de WPScan: ' T; echo
+   printf 'Token de WPScan: '; read -rs T; echo
    printf "export WPSCAN_API_TOKEN='%s'\n" "$T" > ~/.wpaudit.env; unset T
    ```
 
