@@ -1,0 +1,21 @@
+{% macro score(grade, risk_label, grade_desc, risk_index) %}
+{% set ring = {'A': '#137a4b', 'B': '#137a4b', 'C': '#a66a00', 'D': '#d9480f', 'F': '#a4133c'}[grade] %}
+<div class="score">
+  <div class="ring" role="img" aria-label="Calificación {{ grade }}, índice de riesgo {{ risk_index }} de 100">
+    <svg viewBox="0 0 132 132" aria-hidden="true"><circle class="track" cx="66" cy="66" r="56" fill="none" stroke="#e4e8f2" stroke-width="12"/>
+    <circle class="value g-{{ grade }}" cx="66" cy="66" r="56" fill="none" stroke="{{ ring }}" stroke-width="12" stroke-linecap="round" transform="rotate(-90 66 66)" stroke-dasharray="{{ (risk_index * 3.518)|round(1) }} 351.8"/></svg>
+    <b class="g-{{ grade }}">{{ grade }}</b>
+  </div>
+  <div>
+    <h2>Riesgo {{ risk_label|lower }}</h2>
+    <p>{{ grade_desc }}</p>
+    <div class="idx">Índice de riesgo: {{ risk_index }}/100. A mayor valor, mayor exposición.</div>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro breakdown(counts, severities, sev_es, include_info) %}
+{% set total = counts.values()|sum %}
+{% if total %}<div class="sevbar" aria-hidden="true">{% for s in severities if counts[s] %}<span class="bg-{{ s }}" style="width:{{ (counts[s] * 100 / total)|round(2) }}%"></span>{% endfor %}</div>{% endif %}
+<div class="tiles" {% if not total %}style="margin-top:20px"{% endif %}>{% for s in severities if include_info or s != 'info' %}<div class="tile t-{{ s }}"><b>{{ counts[s] }}</b><span>{{ sev_es[s] }}</span></div>{% endfor %}</div>
+{% endmacro %}

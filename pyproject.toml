@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wpaudit"
+description = "Auditoría de seguridad no intrusiva para WordPress, con informes para dirección y para TI."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Juan Manuel Caicedo Castaño" }]
+dynamic = ["version"]
+dependencies = ["requests>=2.28", "jinja2>=3.1"]
+keywords = ["wordpress", "security", "audit", "blue-team", "kali-linux"]
+
+[project.optional-dependencies]
+pdf = ["weasyprint"]
+dev = ["pytest", "ruff"]
+
+[project.scripts]
+wpaudit = "wpaudit.cli:main"
+
+[tool.setuptools]
+packages = ["wpaudit"]
+
+[tool.setuptools.package-data]
+wpaudit = ["templates/*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "wpaudit.__version__" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 160
+
+[tool.ruff.lint]
+select = ["E9", "F"]

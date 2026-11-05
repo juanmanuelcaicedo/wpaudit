@@ -1,0 +1,19 @@
+# Los informes describen debilidades reales: nunca se versionan
+reports/
+auditorias/
+raw/
+resultados.json
+hallazgos.csv
+informe_*.html
+informe_*.pdf
+!docs/demo/*
+
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+.venv/

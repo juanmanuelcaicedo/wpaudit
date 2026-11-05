@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<meta name="robots" content="noindex">
+<meta name="generator" content="wpaudit {{ version }}">
+<title>{% block title %}{% endblock %} · {{ host }}</title>
+<style>{{ css|safe }}</style>
+</head>
+<body>
+<a class="skip" href="#contenido">Ir al contenido</a>
+<header class="hero"><div class="hero-in">
+  <div class="eyebrow">Auditoría de seguridad · WordPress</div>
+  <h1>{% block heading %}{% endblock %}</h1>
+  <div class="site">{{ target }}</div>
+  <dl>
+    {% if client %}<div><dt>Cliente</dt><dd>{{ client }}</dd></div>{% endif %}
+    {% if auditor %}<div><dt>Auditor</dt><dd>{{ auditor }}</dd></div>{% endif %}
+    <div><dt>Fecha</dt><dd>{{ date_long }}</dd></div>
+    <div><dt>Perfil</dt><dd>{{ profile }}</dd></div>
+  </dl>
+  <div class="conf">CONFIDENCIAL</div>
+</div></header>
+{% block body %}{% endblock %}
+<script>{{ js|safe }}</script>
+</body>
+</html>

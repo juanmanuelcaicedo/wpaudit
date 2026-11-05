@@ -1,0 +1,132 @@
+{% extends "base.html" %}{% import "_macros.html" as ui %}
+{% block title %}Informe técnico{% endblock %}
+{% block heading %}Informe técnico de seguridad{% endblock %}
+{% block body %}
+<div class="wrap" id="contenido">
+<div class="card overlap">
+  {{ ui.score(grade, risk_label, grade_desc, risk_index) }}
+  {{ ui.breakdown(counts, severities, sev_es, true) }}
+  {% if gaps %}<div class="notice"><b>Evaluación parcial.</b> No se evaluó por completo: {{ gaps|join(', ') }}. <a href="#cobertura">Ver cobertura</a>.</div>{% endif %}
+</div>
+<div class="layout">
+<nav class="toc" aria-label="Secciones del informe">
+  <a href="#hallazgos">Hallazgos</a>
+  <a href="#cobertura">Cobertura</a>
+  <a href="#tecnologia">Tecnología</a>
+  <a href="#tls">HTTPS y TLS</a>
+  <a href="#cabeceras">Cabeceras HTTP</a>
+  <a href="#metodo">Metodología</a>
+</nav>
+<main class="main">
+
+<section id="hallazgos">
+  <h2>Hallazgos</h2>
+  <p class="lead">Los críticos y altos aparecen abiertos. Filtra, busca y copia las correcciones.</p>
+  {% if findings %}
+  <div class="tools">
+    <button class="chip" type="button" data-sev="all" aria-pressed="true">Todos ({{ findings|length }})</button>
+    {% for s in severities if counts[s] %}<button class="chip" type="button" data-sev="{{ s }}" aria-pressed="false">{{ sev_es[s] }} ({{ counts[s] }})</button>{% endfor %}
+    <input class="search" id="q" type="search" placeholder="Buscar en los hallazgos" aria-label="Buscar en los hallazgos">
+    <button class="btn" id="expand" type="button">Abrir todos</button>
+    <button class="btn" id="collapse" type="button">Cerrar todos</button>
+    <div class="shown" id="shown" aria-live="polite"></div>
+  </div>
+  {% for f in findings %}
+  <details class="finding f-{{ f.severity }}" data-sev="{{ f.severity }}" {% if f.severity in ('critical', 'high') %}open{% endif %}>
+    <summary><span class="badge s-{{ f.severity }}">{{ sev_es[f.severity] }}</span><span class="code">{{ f.code }}</span><h3>{{ f.title }}</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">{{ f.category }} · Esfuerzo {{ f.effort|lower }} · Fuente: {{ f.source }}</div>
+      <h4>Descripción</h4><p>{{ f.description }}</p>
+      {% if f.business_impact %}<h4>Impacto</h4><p>{{ f.business_impact }}</p>{% endif %}
+      {% if f.evidence %}<h4>Evidencia</h4><pre class="ev">{{ f.evidence|join('\n') }}</pre>{% endif %}
+      <h4>Recomendación</h4><p>{{ f.recommendation }}</p>
+      {% if f.fix %}<h4>Corrección sugerida: adáptala y pruébala antes de producción</h4>
+      <div class="codebox"><button class="copy" type="button">Copiar</button><pre class="fix">{{ f.fix }}</pre></div>{% endif %}
+      {% if f.references %}<h4>Referencias</h4><ul>{% for r in f.references if r is is_web_url %}<li><a href="{{ r }}" rel="noopener noreferrer">{{ r }}</a></li>{% endfor %}</ul>{% endif %}
+    </div>
+  </details>
+  {% endfor %}
+  <div class="empty" id="empty">Ningún hallazgo coincide con la búsqueda.</div>
+  {% else %}<div class="notice good">No se encontraron hallazgos en lo evaluado.</div>{% endif %}
+  {% if comparison %}<h3 style="margin-top:24px">Cambios desde la auditoría anterior</h3>
+  <div class="tablewrap"><table>
+    <tr><td class="k">Corregidos</td><td>{{ comparison.resolved|join(', ') or 'Ninguno' }}</td></tr>
+    <tr><td class="k">Nuevos</td><td>{{ comparison.new|join(', ') or 'Ninguno' }}</td></tr>
+    <tr><td class="k">Sin corregir</td><td>{{ comparison.persisting }}</td></tr>
+  </table></div>{% endif %}
+</section>
+
+<section id="cobertura">
+  <h2>Cobertura</h2>
+  <p class="lead">Qué se pudo comprobar en esta ejecución. Lo no evaluado no significa que esté bien.</p>
+  {% if coverage %}<div class="tablewrap"><table><tr><th>Área</th><th>Estado</th><th>Detalle</th></tr>
+  {% for a, c in coverage.items() %}<tr><td>{{ a }}</td><td class="{{ 'st-ok' if c.status == 'completa' else 'st-warn' }}">{{ c.status|capitalize }}</td><td>{{ c.detail }}</td></tr>{% endfor %}</table></div>{% endif %}
+  <h3 style="margin-top:20px">Herramientas ejecutadas</h3>
+  <div class="tablewrap"><table><tr><th>Herramienta</th><th>Estado</th><th>Duración</th><th>Notas</th></tr>
+  <tr><td>Motor de wpaudit</td><td class="st-ok">ok</td><td>—</td><td>{{ requests_made }} peticiones</td></tr>
+  {% for t in tool_runs %}<tr><td>{{ t.tool }}</td><td class="{{ 'st-ok' if t.status == 'ok' else 'st-warn' }}">{{ t.status }}</td><td>{{ t.seconds }} s</td><td>{{ t.note }}</td></tr>{% endfor %}</table></div>
+</section>
+
+<section id="tecnologia">
+  <h2>Tecnología detectada</h2>
+  <div class="tablewrap"><table>
+    <tr><td class="k">WordPress</td><td>{{ meta.wp_version or 'No determinada' }}{% if meta.wp_latest %} (última estable: {{ meta.wp_latest }}){% endif %}</td></tr>
+    <tr><td class="k">PHP</td><td>{{ meta.php_version or 'No expuesta' }}</td></tr>
+    <tr><td class="k">Servidor</td><td>{{ meta.response_headers.get('Server', 'No expuesto') }}</td></tr>
+    <tr><td class="k">Alojamiento</td><td>{{ meta.hosting or 'No identificado' }}</td></tr>
+    <tr><td class="k">CDN o WAF</td><td>{{ (meta.cdn_waf or ['No detectado'])|join(', ') }}</td></tr>
+    <tr><td class="k">Usuarios expuestos</td><td>{{ (meta.users or ['Ninguno detectado'])|join(', ') }}</td></tr>
+    <tr><td class="k">Hosts de terceros</td><td>{{ (meta.third_party_hosts or ['Ninguno'])|join(', ') }}</td></tr>
+  </table></div>
+  {% if meta.plugins %}<h3 style="margin-top:20px">Plugins</h3>
+  <div class="tablewrap"><table><tr><th>Plugin</th><th>Instalada</th><th>Última</th><th>Actualizado</th><th>Estado</th></tr>
+  {% for p in meta.plugins %}<tr><td>{{ p.slug }}</td><td>{{ p.version or '?' }}</td><td>{{ p.latest or '—' }}</td><td>{{ p.last_updated or '—' }}</td><td class="{{ 'st-ok' if p.status == 'Al día' else 'st-bad' if 'esactualizado' in p.status or 'bandonado' in p.status else 'st-warn' }}">{{ p.status }}</td></tr>{% endfor %}</table></div>{% endif %}
+  {% if meta.themes %}<h3 style="margin-top:20px">Temas</h3>
+  <div class="tablewrap"><table><tr><th>Tema</th><th>Instalada</th><th>Última</th><th>Estado</th></tr>
+  {% for p in meta.themes %}<tr><td>{{ p.slug }}</td><td>{{ p.version or '?' }}</td><td>{{ p.latest or '—' }}</td><td class="{{ 'st-ok' if p.status == 'Al día' else 'st-bad' if 'esactualizado' in p.status else 'st-warn' }}">{{ p.status }}</td></tr>{% endfor %}</table></div>{% endif %}
+  {% if meta.open_ports %}<h3 style="margin-top:20px">Puertos abiertos</h3>
+  <div class="tablewrap"><table><tr><th>Puerto</th><th>Servicio</th><th>Producto</th></tr>
+  {% for p in meta.open_ports %}<tr><td>{{ p.port }}/{{ p.proto }}</td><td>{{ p.service }}</td><td>{{ p.product }}</td></tr>{% endfor %}</table></div>{% endif %}
+  {% if meta.whatweb %}<p class="fmeta" style="margin-top:12px"><b>WhatWeb:</b> {% for k, v in meta.whatweb.items() %}{{ k }}{% if v %} [{{ v }}]{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+</section>
+
+<section id="tls">
+  <h2>HTTPS y TLS</h2>
+  {% if meta.tls %}<div class="tablewrap"><table>
+    <tr><td class="k">Protocolo</td><td>{{ meta.tls.protocol or '—' }}</td></tr>
+    <tr><td class="k">Cifrado</td><td>{{ meta.tls.cipher or '—' }}</td></tr>
+    <tr><td class="k">Certificado válido</td><td>{{ 'Sí' if meta.tls.cert_valid else 'No: ' ~ (meta.tls.verify_error or 'verificación fallida') }}</td></tr>
+    <tr><td class="k">Emisor</td><td>{{ meta.tls.issuer or '—' }}</td></tr>
+    <tr><td class="k">Sujeto y SAN</td><td>{{ meta.tls.subject or '—' }}{% if meta.tls.san %} ({{ meta.tls.san|join(', ') }}){% endif %}</td></tr>
+    <tr><td class="k">Vencimiento</td><td>{{ meta.tls.not_after or '—' }}{% if meta.tls.days_left is defined %} ({{ meta.tls.days_left }} días){% endif %}</td></tr>
+    {% if meta.tls.legacy %}<tr><td class="k">Protocolos antiguos</td><td>{% for k, v in meta.tls.legacy.items() %}{{ k }}: {{ v }}{% if not loop.last %} · {% endif %}{% endfor %}</td></tr>{% endif %}
+    {% if meta.tls.sslscan %}<tr><td class="k">SSLScan</td><td>{% for k, v in meta.tls.sslscan.items() %}{{ k }}: {{ v }}{% if not loop.last %} · {% endif %}{% endfor %}</td></tr>{% endif %}
+  </table></div>{% else %}<p class="lead">No se analizó TLS porque el sitio no usa HTTPS o el puerto no fue accesible.</p>{% endif %}
+</section>
+
+<section id="cabeceras">
+  <h2>Cabeceras HTTP</h2>
+  {% if meta.security_headers %}<div class="tablewrap"><table><tr><th>Cabecera</th><th>Valor</th><th>Estado</th></tr>
+  {% for n, v, s in meta.security_headers %}<tr><td>{{ n }}</td><td>{{ v }}</td><td class="{{ 'st-ok' if s == 'OK' else 'st-bad' if s == 'Ausente' else 'st-warn' }}">{{ s }}</td></tr>{% endfor %}</table></div>{% endif %}
+</section>
+
+<section id="metodo">
+  <h2>Metodología y límites</h2>
+  <div class="tablewrap"><table>
+    <tr><td class="k">Objetivo</td><td>{{ target }}</td></tr>
+    <tr><td class="k">Inicio y fin</td><td>{{ started }} a {{ finished }}</td></tr>
+    <tr><td class="k">Peticiones HTTP</td><td>{{ requests_made }}</td></tr>
+    <tr><td class="k">Referencias</td><td>OWASP WSTG, OWASP Top 10, OWASP Secure Headers y guía de hardening de WordPress.</td></tr>
+  </table></div>
+  <ul style="margin-top:14px;padding-left:20px">
+    <li>No se hizo fuerza bruta ni se probaron límites de login: verifica 2FA, bloqueo de intentos y WAF manualmente.</li>
+    <li>No se explotaron vulnerabilidades ni se inició sesión: no se evaluó el área de administración, los roles ni el código a medida.</li>
+    <li>Las versiones de plugins dependen de archivos públicos y pueden ser inexactas.</li>
+    {% for n in notes %}<li>{{ n }}</li>{% endfor %}
+  </ul>
+</section>
+<div class="foot">Generado por wpaudit {{ version }} el {{ date_long }}. Pruebas no intrusivas dentro del alcance autorizado. La ausencia de hallazgos no garantiza la ausencia de vulnerabilidades.</div>
+</main>
+</div>
+</div>
+{% endblock %}

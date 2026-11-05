@@ -1,0 +1,57 @@
+{% extends "base.html" %}{% import "_macros.html" as ui %}
+{% block title %}Informe ejecutivo{% endblock %}
+{% block heading %}Informe ejecutivo de seguridad{% endblock %}
+{% block body %}
+<main class="wrap" id="contenido">
+<div class="card overlap">
+  {{ ui.score(grade, risk_label, grade_desc, risk_index) }}
+  {{ ui.breakdown(counts, severities, sev_es, false) }}
+</div>
+<p style="margin-top:20px">{{ summary }}</p>
+{% if gaps %}<div class="notice"><b>Evaluación parcial.</b> La calificación solo refleja lo que se pudo comprobar. No se evaluó por completo: {{ gaps|join(', ') }}. El detalle está en el informe técnico.</div>{% endif %}
+{% if comparison %}<div class="notice neutral"><b>Frente a la auditoría anterior:</b> nota {{ comparison.previous_grade }} → {{ grade }} e índice {{ comparison.previous_index }} → {{ risk_index }}.
+{{ comparison.resolved|length }} corregidos, {{ comparison.new|length }} nuevos y {{ comparison.persisting }} sin corregir.</div>{% endif %}
+
+<section>
+  <h2>Lo más urgente</h2>
+  {% if top_risks %}<p class="lead">Los riesgos con mayor impacto y la acción recomendada para cada uno.</p>
+  <ol class="risks">{% for f in top_risks %}
+    <li class="risk">
+      <div class="num">{{ loop.index }}</div>
+      <div>
+        <span class="badge s-{{ f.severity }}">{{ sev_es[f.severity] }}</span><span class="ref">{{ f.code }}</span>
+        <h3>{{ f.title }}</h3>
+        <p>{{ f.business_impact or generic_impact[f.severity] }}</p>
+        <p class="do"><b>Qué hacer:</b> {{ f.recommendation }}</p>
+      </div>
+    </li>{% endfor %}
+  </ol>
+  {% else %}<div class="notice good">No se identificaron riesgos de prioridad crítica, alta o media en lo evaluado.</div>{% endif %}
+</section>
+
+<section>
+  <h2>Plan de acción</h2>
+  <p class="lead">Dentro de cada plazo, primero el mayor riesgo y luego lo que requiere menos esfuerzo.</p>
+  <div class="plan">{% for bucket in plan %}
+    <div class="phase p{{ loop.index0 }}">
+      <h3>{{ bucket.name }}</h3>
+      <div class="when">{{ bucket.window }}</div>
+      {% if bucket['items'] %}<ul>{% for f in bucket['items'] %}<li>{{ f.title }}<span class="effort">{{ f.code }} · Esfuerzo {{ f.effort|lower }}</span></li>{% endfor %}</ul>
+      {% else %}<p class="none">Sin acciones en este plazo.</p>{% endif %}
+    </div>{% endfor %}
+  </div>
+</section>
+
+<section>
+  <h2>Lo que está bien</h2>
+  {% if positives %}<div class="card" style="margin-top:12px"><ul class="checks">{% for p in positives %}<li>{{ p }}</li>{% endfor %}</ul></div>
+  {% else %}<p class="lead">Las pruebas automatizadas no confirmaron controles destacables.</p>{% endif %}
+</section>
+
+<section>
+  <h2>Alcance</h2>
+  <p>Se evaluó la exposición pública de <b>{{ target }}</b> con pruebas no intrusivas: sin fuerza bruta, sin explotación y sin modificar contenido. No se evaluó el código a medida, los procesos internos ni la resistencia a ataques de contraseñas. Se recomienda complementar con una revisión manual y repetir la auditoría después de corregir.</p>
+</section>
+<div class="foot">Generado por wpaudit {{ version }} el {{ date_long }}. La ausencia de hallazgos no garantiza la ausencia de vulnerabilidades.</div>
+</main>
+{% endblock %}

@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<meta name="robots" content="noindex">
+<meta name="generator" content="wpaudit 1.2.0">
+<title>Informe técnico · 127.0.0.1</title>
+<style>:root {
+  --bg: #f4f6fb; --surface: #fff; --surface-2: #f1f4fa; --ink: #141b34; --muted: #566079; --line: #dfe4ef;
+  --brand: #18224f; --brand-2: #2a3a8c; --accent: #e8622a; --link: #2747c7;
+  --critical: #a4133c; --high: #d9480f; --medium: #a66a00; --low: #2563a8; --info: #5c6780; --good: #137a4b;
+  --critical-soft: #fbe9ee; --high-soft: #fdeee6; --medium-soft: #fbf3e0; --low-soft: #e8f1fb; --info-soft: #eef0f5; --good-soft: #e5f5ed;
+  --code-bg: #111833; --code-ink: #e6eaf8;
+  --radius: 14px; --shadow: 0 1px 2px rgba(20,27,52,.05), 0 8px 24px rgba(20,27,52,.05);
+}
+@media screen and (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0c1124; --surface: #151c35; --surface-2: #1c2542; --ink: #eef1fb; --muted: #a5aecb; --line: #2c3657;
+    --brand: #0f1633; --brand-2: #26337a; --link: #9db2ff;
+    --critical: #ff7d9c; --high: #ff9a66; --medium: #e8b84a; --low: #79b4f2; --info: #a5aecb; --good: #5fd39d;
+    --critical-soft: #3a1524; --high-soft: #3a1f12; --medium-soft: #352a10; --low-soft: #14293f; --info-soft: #232b45; --good-soft: #10301f;
+    --shadow: none;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.6 "Segoe UI", system-ui, -apple-system, Roboto, "DejaVu Sans", Arial, sans-serif; -webkit-text-size-adjust: 100%; }
+h1, h2, h3, h4, p { margin: 0; }
+h2 { font-size: 22px; line-height: 1.25; letter-spacing: -.01em; }
+h3 { font-size: 16px; line-height: 1.35; }
+a { color: var(--link); overflow-wrap: anywhere; }
+code, pre { font-family: ui-monospace, "Cascadia Code", Consolas, "DejaVu Sans Mono", monospace; }
+.skip { position: absolute; left: -999px; }
+.skip:focus { left: 12px; top: 12px; background: var(--surface); padding: 8px 12px; z-index: 10; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.hero { background: linear-gradient(120deg, #111a42, var(--brand-2)); color: #fff; padding: 40px 24px 92px; }
+.hero-in { max-width: 1120px; margin: 0 auto; }
+.wrap { max-width: 1168px; margin: 0 auto; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #ffb08a; }
+.hero h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.1; letter-spacing: -.02em; margin: 10px 0 6px; }
+.hero .site { font-size: 17px; color: #d6dcf5; overflow-wrap: anywhere; }
+.hero dl { display: flex; flex-wrap: wrap; gap: 8px 32px; margin: 22px 0 0; font-size: 13px; }
+.hero dt { color: #aeb8e0; } .hero dd { margin: 0; font-weight: 600; }
+.conf { display: inline-block; margin-top: 18px; padding: 3px 12px; border: 1px solid rgba(255,255,255,.35); border-radius: 99px; font-size: 11px; font-weight: 700; letter-spacing: .08em; }
+
+.wrap { padding: 0 24px 56px; }
+.overlap { margin-top: -60px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; }
+section { margin-top: 40px; scroll-margin-top: 16px; }
+section > h2 { margin-bottom: 6px; }
+.lead { color: var(--muted); margin-bottom: 16px; }
+
+.score { display: flex; gap: 28px; align-items: center; }
+.ring { position: relative; flex: none; width: 132px; height: 132px; }
+.ring svg { width: 132px; height: 132px; display: block; }
+.ring .track { fill: none; stroke: var(--surface-2); stroke-width: 12; }
+.ring .value { fill: none; stroke-width: 12; stroke-linecap: round; }
+.ring b { position: absolute; top: 0; left: 0; width: 132px; line-height: 132px; text-align: center; font-size: 52px; }
+.g-A, .g-B { color: var(--good); stroke: var(--good); } .g-C { color: var(--medium); stroke: var(--medium); }
+.g-D { color: var(--high); stroke: var(--high); } .g-F { color: var(--critical); stroke: var(--critical); }
+.score h2 { font-size: 24px; }
+.score .idx { font-size: 13px; color: var(--muted); margin-top: 8px; }
+.score p { margin-top: 6px; }
+
+.sevbar { display: flex; height: 10px; border-radius: 99px; overflow: hidden; background: var(--surface-2); margin: 22px 0 14px; }
+.sevbar span { display: block; height: 10px; }
+.bg-critical { background: var(--critical); } .bg-high { background: var(--high); } .bg-medium { background: var(--medium); } .bg-low { background: var(--low); } .bg-info { background: var(--info); }
+.tiles { display: flex; flex-wrap: wrap; gap: 10px; }
+.tile { flex: 1 1 90px; padding: 10px 14px; border-radius: 10px; background: var(--surface-2); }
+.tile b { display: block; font-size: 26px; line-height: 1.15; }
+.tile span { font-size: 12px; color: var(--muted); }
+.t-critical b { color: var(--critical); } .t-high b { color: var(--high); } .t-medium b { color: var(--medium); } .t-low b { color: var(--low); } .t-info b { color: var(--info); }
+
+.notice { display: block; margin-top: 16px; padding: 14px 16px; border-radius: 10px; border-left: 4px solid var(--medium); background: var(--medium-soft); }
+.notice.good { border-color: var(--good); background: var(--good-soft); }
+.notice.neutral { border-color: var(--brand-2); background: var(--surface-2); }
+
+.badge { display: inline-block; padding: 1px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.s-critical { color: var(--critical); background: var(--critical-soft); } .s-high { color: var(--high); background: var(--high-soft); }
+.s-medium { color: var(--medium); background: var(--medium-soft); } .s-low { color: var(--low); background: var(--low-soft); } .s-info { color: var(--info); background: var(--info-soft); }
+
+.risks { list-style: none; margin: 0; padding: 0; }
+.risk { display: flex; gap: 16px; padding: 18px 20px; margin-top: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); page-break-inside: avoid; }
+.risk .num { flex: none; width: 34px; height: 34px; line-height: 34px; border-radius: 50%; text-align: center; font-weight: 700; background: var(--surface-2); }
+.risk h3 { margin: 4px 0; }
+.risk p { color: var(--muted); }
+.risk .do { color: var(--ink); margin-top: 6px; }
+.ref { font-size: 12px; color: var(--muted); margin-left: 6px; }
+
+.plan { display: flex; gap: 14px; align-items: flex-start; }
+.phase { flex: 1 1 0; min-width: 0; padding: 18px; background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--info); border-radius: var(--radius); }
+.phase.p0 { border-top-color: var(--critical); } .phase.p1 { border-top-color: var(--medium); } .phase.p2 { border-top-color: var(--low); }
+.phase .when { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.phase ul { list-style: none; margin: 0; padding: 0; }
+.phase li { padding: 8px 0 8px 24px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.4; position: relative; page-break-inside: avoid; }
+.phase li::before { content: ""; position: absolute; left: 0; top: 11px; width: 13px; height: 13px; border: 2px solid var(--muted); border-radius: 4px; }
+.phase .none { color: var(--muted); font-size: 14px; }
+.effort { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.checks { list-style: none; margin: 0; padding: 0; }
+.checks li { padding: 8px 0 8px 28px; border-top: 1px solid var(--line); position: relative; }
+.checks li:first-child { border-top: 0; }
+.checks li::before { content: "✓"; position: absolute; left: 4px; color: var(--good); font-weight: 700; }
+
+.layout { display: flex; gap: 32px; align-items: flex-start; }
+.toc { position: sticky; top: 16px; flex: none; width: 196px; margin-top: 40px; font-size: 14px; }
+.toc a { display: block; padding: 6px 12px; border-left: 2px solid var(--line); color: var(--muted); text-decoration: none; }
+.toc a:hover, .toc a.on { color: var(--ink); border-left-color: var(--accent); }
+.main { flex: 1; min-width: 0; }
+
+.tools { display: none; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; position: sticky; top: 0; z-index: 2; padding: 10px 0; background: var(--bg); }
+.js .tools { display: flex; }
+.chip, .btn { min-height: 36px; padding: 5px 13px; font: inherit; font-size: 13px; font-weight: 600; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 99px; cursor: pointer; }
+.chip[aria-pressed="true"] { color: #fff; background: var(--brand-2); border-color: var(--brand-2); }
+.search { flex: 1 1 200px; min-height: 36px; padding: 5px 14px; font: inherit; font-size: 14px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 99px; }
+.shown { font-size: 13px; color: var(--muted); width: 100%; }
+.empty { display: none; padding: 20px; text-align: center; color: var(--muted); }
+
+.finding { margin-top: 10px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--info); border-radius: 10px; }
+.finding.f-critical { border-left-color: var(--critical); } .finding.f-high { border-left-color: var(--high); }
+.finding.f-medium { border-left-color: var(--medium); } .finding.f-low { border-left-color: var(--low); }
+.finding summary { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; padding: 14px 16px; cursor: pointer; list-style: none; }
+.finding summary::-webkit-details-marker { display: none; }
+.finding summary::after { content: "+"; margin-left: auto; color: var(--muted); font-size: 20px; line-height: 1; }
+.finding[open] summary::after { content: "−"; }
+.finding summary h3 { flex: 1 1 260px; }
+.finding .code { font-size: 12px; color: var(--muted); }
+.fbody { padding: 0 16px 16px; }
+.fmeta { font-size: 13px; color: var(--muted); }
+.fbody h4 { margin-top: 14px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.fbody ul { margin: 4px 0; padding-left: 18px; }
+.codebox { position: relative; }
+pre { margin: 4px 0 0; padding: 12px 14px; border-radius: 8px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+pre.fix { background: var(--code-bg); color: var(--code-ink); }
+pre.ev { background: var(--surface-2); }
+.copy { display: none; position: absolute; top: 8px; right: 8px; padding: 3px 10px; font-size: 12px; color: #fff; background: rgba(255,255,255,.14); border: 0; border-radius: 6px; cursor: pointer; }
+.js .copy { display: block; }
+
+.tablewrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin-top: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-size: 12px; color: var(--muted); padding: 10px 14px; background: var(--surface-2); }
+td { padding: 9px 14px; border-top: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+tr { page-break-inside: avoid; }
+td.k { width: 30%; font-weight: 600; }
+.st-ok { color: var(--good); font-weight: 700; } .st-bad { color: var(--critical); font-weight: 700; } .st-warn { color: var(--medium); font-weight: 700; }
+.foot { margin-top: 44px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+
+@media (max-width: 860px) {
+  .layout { display: block; } .toc { display: none; }
+  .plan { display: block; } .phase { margin-top: 10px; }
+  .tools { position: static; }
+}
+@media (max-width: 560px) {
+  .hero { padding: 28px 16px 84px; } .wrap { padding: 0 16px 40px; } .card { padding: 18px; }
+  .score { display: block; } .ring { margin: 0 auto 14px; } .score { text-align: center; }
+  .risk { gap: 12px; padding: 14px; } .tile { flex-basis: 40%; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+@page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: counter(page) " / " counter(pages); font: 9pt "DejaVu Sans", Arial, sans-serif; color: #566079; } @bottom-left { content: "CONFIDENCIAL"; font: 8pt "DejaVu Sans", Arial, sans-serif; color: #566079; letter-spacing: .08em; } }
+@media print {
+  body { background: #fff; font-size: 10.5pt; }
+  .hero { padding: 26px 24px 24px; border-radius: 10px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .wrap { padding: 0; max-width: none; } .overlap { margin-top: 14px; }
+  .card, .risk, .phase, .finding, .tablewrap { box-shadow: none; }
+  .toc, .tools, .copy, .skip, .finding summary::after { display: none !important; }
+  .layout { display: block; }
+  .tablewrap { overflow: visible; }
+  section { margin-top: 16px; }
+  h2 { page-break-after: avoid; }
+  h3, h4, .finding summary, .lead { page-break-after: avoid; }
+  pre, .fbody p, .fbody ul { page-break-inside: avoid; }
+  .fbody { page-break-before: avoid; }
+  .fmeta { page-break-after: avoid; }
+  .risk { padding: 10px 14px; margin-top: 7px; }
+  .phase li { padding-top: 5px; padding-bottom: 5px; }
+  .foot { margin-top: 14px; padding-top: 8px; page-break-before: avoid; }
+  .plan { display: block; }
+  .phase { margin-top: 10px; padding: 12px 14px; }
+  .phase h3, .phase .when { display: inline; margin-right: 8px; }
+  .phase ul { margin-top: 8px; }
+  .sevbar span, .badge, .tile, .notice, .phase, th, pre, .ring { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#contenido">Ir al contenido</a>
+<header class="hero"><div class="hero-in">
+  <div class="eyebrow">Auditoría de seguridad · WordPress</div>
+  <h1>Informe técnico de seguridad</h1>
+  <div class="site">http://127.0.0.1:8099</div>
+  <dl>
+    <div><dt>Cliente</dt><dd>Empresa Demo S.A.S.</dd></div>
+    <div><dt>Auditor</dt><dd>Datos simulados</dd></div>
+    <div><dt>Fecha</dt><dd>05/11/2026 12:38</dd></div>
+    <div><dt>Perfil</dt><dd>quick</dd></div>
+  </dl>
+  <div class="conf">CONFIDENCIAL</div>
+</div></header>
+
+<div class="wrap" id="contenido">
+<div class="card overlap">
+  
+
+<div class="score">
+  <div class="ring" role="img" aria-label="Calificación F, índice de riesgo 82 de 100">
+    <svg viewBox="0 0 132 132" aria-hidden="true"><circle class="track" cx="66" cy="66" r="56" fill="none" stroke="#e4e8f2" stroke-width="12"/>
+    <circle class="value g-F" cx="66" cy="66" r="56" fill="none" stroke="#a4133c" stroke-width="12" stroke-linecap="round" transform="rotate(-90 66 66)" stroke-dasharray="288.5 351.8"/></svg>
+    <b class="g-F">F</b>
+  </div>
+  <div>
+    <h2>Riesgo crítico</h2>
+    <p>Exposición grave; se requiere acción inmediata.</p>
+    <div class="idx">Índice de riesgo: 82/100. A mayor valor, mayor exposición.</div>
+  </div>
+</div>
+
+  
+
+<div class="sevbar" aria-hidden="true"><span class="bg-critical" style="width:5.0%"></span><span class="bg-high" style="width:15.0%"></span><span class="bg-medium" style="width:20.0%"></span><span class="bg-low" style="width:55.0%"></span><span class="bg-info" style="width:5.0%"></span></div>
+<div class="tiles" ><div class="tile t-critical"><b>1</b><span>Crítica</span></div><div class="tile t-high"><b>3</b><span>Alta</span></div><div class="tile t-medium"><b>4</b><span>Media</span></div><div class="tile t-low"><b>11</b><span>Baja</span></div><div class="tile t-info"><b>1</b><span>Informativa</span></div></div>
+
+  <div class="notice"><b>Evaluación parcial.</b> No se evaluó por completo: Versiones (api.wordpress.org), Vulnerabilidades conocidas (CVE). <a href="#cobertura">Ver cobertura</a>.</div>
+</div>
+<div class="layout">
+<nav class="toc" aria-label="Secciones del informe">
+  <a href="#hallazgos">Hallazgos</a>
+  <a href="#cobertura">Cobertura</a>
+  <a href="#tecnologia">Tecnología</a>
+  <a href="#tls">HTTPS y TLS</a>
+  <a href="#cabeceras">Cabeceras HTTP</a>
+  <a href="#metodo">Metodología</a>
+</nav>
+<main class="main">
+
+<section id="hallazgos">
+  <h2>Hallazgos</h2>
+  <p class="lead">Los críticos y altos aparecen abiertos. Filtra, busca y copia las correcciones.</p>
+  
+  <div class="tools">
+    <button class="chip" type="button" data-sev="all" aria-pressed="true">Todos (20)</button>
+    <button class="chip" type="button" data-sev="critical" aria-pressed="false">Crítica (1)</button><button class="chip" type="button" data-sev="high" aria-pressed="false">Alta (3)</button><button class="chip" type="button" data-sev="medium" aria-pressed="false">Media (4)</button><button class="chip" type="button" data-sev="low" aria-pressed="false">Baja (11)</button><button class="chip" type="button" data-sev="info" aria-pressed="false">Informativa (1)</button>
+    <input class="search" id="q" type="search" placeholder="Buscar en los hallazgos" aria-label="Buscar en los hallazgos">
+    <button class="btn" id="expand" type="button">Abrir todos</button>
+    <button class="btn" id="collapse" type="button">Cerrar todos</button>
+    <div class="shown" id="shown" aria-live="polite"></div>
+  </div>
+  
+  <details class="finding f-critical" data-sev="critical" open>
+    <summary><span class="badge s-critical">Crítica</span><span class="code">WPA-001</span><h3>Copia de wp-config.php accesible públicamente</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Exposición de archivos · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>Se puede descargar un respaldo del archivo de configuración con credenciales de base de datos y claves de seguridad.</p>
+      <h4>Impacto</h4><p>Compromiso total: acceso a la base de datos, posible toma de control del sitio y de los datos de usuarios.</p>
+      <h4>Evidencia</h4><pre class="ev">GET /wp-config.php.bak → HTTP 200 (61 bytes; contenido omitido por seguridad)</pre>
+      <h4>Recomendación</h4><p>Retire el archivo del directorio web, rote TODAS las credenciales afectadas y revise los registros de acceso por descargas previas. Cambie las salts/keys de wp-config.php y la contraseña de la base de datos.</p>
+      
+      <h4>Referencias</h4><ul><li><a href="https://developer.wordpress.org/advanced-administration/security/hardening/" rel="noopener noreferrer">https://developer.wordpress.org/advanced-administration/security/hardening/</a></li><li><a href="https://owasp.org/www-project-web-security-testing-guide/" rel="noopener noreferrer">https://owasp.org/www-project-web-security-testing-guide/</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-high" data-sev="high" open>
+    <summary><span class="badge s-high">Alta</span><span class="code">WPA-002</span><h3>Registro de depuración de WordPress accesible</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Exposición de archivos · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>debug.log es público y puede revelar rutas del servidor, consultas SQL, errores y datos de usuarios.</p>
+      <h4>Impacto</h4><p>Información valiosa para preparar ataques dirigidos.</p>
+      <h4>Evidencia</h4><pre class="ev">GET /wp-content/debug.log → HTTP 200 (74 bytes; contenido omitido por seguridad)</pre>
+      <h4>Recomendación</h4><p>Elimine el archivo, desactive WP_DEBUG_LOG en producción o redirija el log fuera del directorio web.</p>
+      <h4>Corrección sugerida: adáptala y pruébala antes de producción</h4>
+      <div class="codebox"><button class="copy" type="button">Copiar</button><pre class="fix">// wp-config.php (producción)
+define(&#39;WP_DEBUG&#39;, false);
+define(&#39;WP_DEBUG_DISPLAY&#39;, false);
+define(&#39;WP_DEBUG_LOG&#39;, &#39;/var/log/wordpress/debug.log&#39;);</pre></div>
+      <h4>Referencias</h4><ul><li><a href="https://developer.wordpress.org/advanced-administration/security/hardening/" rel="noopener noreferrer">https://developer.wordpress.org/advanced-administration/security/hardening/</a></li><li><a href="https://owasp.org/www-project-web-security-testing-guide/" rel="noopener noreferrer">https://owasp.org/www-project-web-security-testing-guide/</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-high" data-sev="high" open>
+    <summary><span class="badge s-high">Alta</span><span class="code">WPA-003</span><h3>PHP 7.4 está fuera de soporte</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Plataforma · Esfuerzo medio · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>Las ramas de PHP sin soporte no reciben parches de seguridad, aunque WordPress esté actualizado.</p>
+      <h4>Impacto</h4><p>Vulnerabilidades conocidas del lenguaje quedan sin corregir y pueden comprometer todo el servidor.</p>
+      <h4>Evidencia</h4><pre class="ev">Versión detectada: PHP/7.4.3
+Fin de soporte de seguridad: 2022-11-28</pre>
+      <h4>Recomendación</h4><p>Migre a una rama de PHP con soporte activo (consulte php.net/supported-versions) tras probar tema y plugins en un entorno de pruebas.</p>
+      
+      <h4>Referencias</h4><ul><li><a href="https://www.php.net/supported-versions.php" rel="noopener noreferrer">https://www.php.net/supported-versions.php</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-high" data-sev="high" open>
+    <summary><span class="badge s-high">Alta</span><span class="code">WPA-004</span><h3>El sitio se sirve sin HTTPS</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Transporte · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>La URL auditada utiliza HTTP en claro. Credenciales, cookies de sesión y contenido viajan sin cifrar y pueden ser interceptados o alterados.</p>
+      <h4>Impacto</h4><p>Un atacante en la misma red (Wi-Fi público, proveedor) podría robar sesiones de administrador o inyectar contenido malicioso a sus visitantes.</p>
+      <h4>Evidencia</h4><pre class="ev">URL auditada: http://127.0.0.1:8099</pre>
+      <h4>Recomendación</h4><p>Instale un certificado TLS (p. ej. Let&#39;s Encrypt), redirija todo el tráfico HTTP a HTTPS y actualice las URLs de WordPress (Ajustes → Generales) a https://.</p>
+      
+      <h4>Referencias</h4><ul><li><a href="https://owasp.org/www-project-web-security-testing-guide/" rel="noopener noreferrer">https://owasp.org/www-project-web-security-testing-guide/</a></li><li><a href="https://letsencrypt.org/getting-started/" rel="noopener noreferrer">https://letsencrypt.org/getting-started/</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-medium" data-sev="medium" >
+    <summary><span class="badge s-medium">Media</span><span class="code">WPA-005</span><h3>Registro público de usuarios habilitado</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Autenticación · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>Cualquier persona puede crear una cuenta. Si el rol por defecto no es &#39;Suscriptor&#39; o hay plugins con fallos de escalada de privilegios, el riesgo aumenta.</p>
+      
+      <h4>Evidencia</h4><pre class="ev">GET /wp-login.php?action=register → formulario de registro disponible</pre>
+      <h4>Recomendación</h4><p>Desactive &#39;Cualquiera puede registrarse&#39; (Ajustes → Generales) si no lo necesita; si lo necesita, mantenga el rol por defecto como Suscriptor y añada CAPTCHA/verificación de email.</p>
+      
+      <h4>Referencias</h4><ul><li><a href="https://developer.wordpress.org/advanced-administration/security/hardening/" rel="noopener noreferrer">https://developer.wordpress.org/advanced-administration/security/hardening/</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-medium" data-sev="medium" >
+    <summary><span class="badge s-medium">Media</span><span class="code">WPA-006</span><h3>Enumeración de nombres de usuario posible</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Autenticación · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>Es posible obtener nombres de usuario válidos sin autenticarse (REST API y/o archivos de autor). Esto facilita los ataques de fuerza bruta y de credential stuffing.</p>
+      <h4>Impacto</h4><p>Los atacantes pueden dirigir ataques de contraseñas contra cuentas reales, incluidas las de administración.</p>
+      <h4>Evidencia</h4><pre class="ev">GET /wp-json/wp/v2/users → 2 usuario(s) listados sin autenticación
+/?author=1 redirige a /author/admin/
+Usuarios expuestos: admin, ana</pre>
+      <h4>Recomendación</h4><p>Restrinja el endpoint /wp/v2/users a usuarios autenticados, bloquee ?author=N y use 2FA en cuentas con privilegios.</p>
+      <h4>Corrección sugerida: adáptala y pruébala antes de producción</h4>
+      <div class="codebox"><button class="copy" type="button">Copiar</button><pre class="fix">// functions.php
+add_filter(&#39;rest_endpoints&#39;, function ($e) {
+  if (!is_user_logged_in()) {
+    unset($e[&#39;/wp/v2/users&#39;], $e[&#39;/wp/v2/users/(?P&lt;id&gt;[\d]+)&#39;]);
+  }
+  return $e;
+});
+
+# Apache: bloquear enumeración por ?author=
+RewriteCond %{QUERY_STRING} (^|&amp;)author=\d+ [NC]
+RewriteRule ^ - [F]</pre></div>
+      <h4>Referencias</h4><ul><li><a href="https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/03-Identity_Management_Testing/04-Testing_for_Account_Enumeration_and_Guessable_User_Account" rel="noopener noreferrer">https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/03-Identity_Management_Testing/04-Testing_for_Account_Enumeration_and_Guessable_User_Account</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-medium" data-sev="medium" >
+    <summary><span class="badge s-medium">Media</span><span class="code">WPA-007</span><h3>Listado de directorios habilitado</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Configuración del servidor · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>El servidor muestra el contenido de directorios, revelando archivos que no deberían ser descubribles.</p>
+      <h4>Impacto</h4><p>Divulgación de ficheros internos, plugins instalados y posibles archivos sensibles subidos.</p>
+      <h4>Evidencia</h4><pre class="ev">GET /wp-content/uploads/ → HTTP 200 (119 bytes; contenido omitido por seguridad)</pre>
+      <h4>Recomendación</h4><p>Desactive el autoindex en el servidor web.</p>
+      <h4>Corrección sugerida: adáptala y pruébala antes de producción</h4>
+      <div class="codebox"><button class="copy" type="button">Copiar</button><pre class="fix"># Apache (.htaccess)
+Options -Indexes
+
+# Nginx
+autoindex off;</pre></div>
+      <h4>Referencias</h4><ul><li><a href="https://developer.wordpress.org/advanced-administration/security/hardening/" rel="noopener noreferrer">https://developer.wordpress.org/advanced-administration/security/hardening/</a></li><li><a href="https://owasp.org/www-project-web-security-testing-guide/" rel="noopener noreferrer">https://owasp.org/www-project-web-security-testing-guide/</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-medium" data-sev="medium" >
+    <summary><span class="badge s-medium">Media</span><span class="code">WPA-008</span><h3>XML-RPC habilitado con métodos de riesgo</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Superficie de ataque · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>xmlrpc.php permite probar cientos de contraseñas en una sola petición (system.multicall) y usar el sitio como pivote en ataques de denegación de servicio (pingback.ping).</p>
+      <h4>Impacto</h4><p>Facilita la fuerza bruta evadiendo límites de intentos de login y el abuso del servidor.</p>
+      <h4>Evidencia</h4><pre class="ev">POST /xmlrpc.php system.listMethods → 4 métodos
+Método expuesto: system.multicall
+Método expuesto: pingback.ping</pre>
+      <h4>Recomendación</h4><p>Desactive XML-RPC si no usa Jetpack, la app móvil de WordPress o integraciones que lo requieran.</p>
+      <h4>Corrección sugerida: adáptala y pruébala antes de producción</h4>
+      <div class="codebox"><button class="copy" type="button">Copiar</button><pre class="fix">// functions.php
+add_filter(&#39;xmlrpc_enabled&#39;, &#39;__return_false&#39;);
+
+# Apache
+&lt;Files xmlrpc.php&gt;
+  Require all denied
+&lt;/Files&gt;
+
+# Nginx
+location = /xmlrpc.php { deny all; }</pre></div>
+      <h4>Referencias</h4><ul><li><a href="https://developer.wordpress.org/advanced-administration/security/hardening/" rel="noopener noreferrer">https://developer.wordpress.org/advanced-administration/security/hardening/</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-low" data-sev="low" >
+    <summary><span class="badge s-low">Baja</span><span class="code">WPA-009</span><h3>Panel de acceso (wp-login.php) expuesto a Internet</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Autenticación · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>El formulario de login es accesible desde cualquier IP. Es el punto de entrada de la mayoría de ataques de fuerza bruta contra WordPress. No se detectó CAPTCHA.</p>
+      <h4>Impacto</h4><p>Intentos masivos de adivinar contraseñas; si prospera uno, el atacante controla el sitio.</p>
+      
+      <h4>Recomendación</h4><p>Active 2FA para administradores/editores, limite intentos fallidos, use contraseñas únicas largas y, si es posible, restrinja /wp-admin por IP o detrás de VPN/WAF. (No se probaron contraseñas durante esta auditoría.)</p>
+      <h4>Corrección sugerida: adáptala y pruébala antes de producción</h4>
+      <div class="codebox"><button class="copy" type="button">Copiar</button><pre class="fix"># Apache — restringir wp-login por IP
+&lt;Files wp-login.php&gt;
+  Require ip 203.0.113.10
+&lt;/Files&gt;
+
+# Nginx
+location = /wp-login.php { allow 203.0.113.10; deny all; fastcgi_pass ...; }</pre></div>
+      <h4>Referencias</h4><ul><li><a href="https://developer.wordpress.org/advanced-administration/security/hardening/" rel="noopener noreferrer">https://developer.wordpress.org/advanced-administration/security/hardening/</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-low" data-sev="low" >
+    <summary><span class="badge s-low">Baja</span><span class="code">WPA-010</span><h3>Existen nombres de usuario predecibles</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Autenticación · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>Cuentas con nombres como &#39;admin&#39; son el primer objetivo de ataques automatizados.</p>
+      
+      <h4>Evidencia</h4><pre class="ev">Usuario: admin</pre>
+      <h4>Recomendación</h4><p>Cree un administrador con nombre no predecible, reasigne el contenido y elimine la cuenta predecible.</p>
+      
+      <h4>Referencias</h4><ul><li><a href="https://developer.wordpress.org/advanced-administration/security/hardening/" rel="noopener noreferrer">https://developer.wordpress.org/advanced-administration/security/hardening/</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-low" data-sev="low" >
+    <summary><span class="badge s-low">Baja</span><span class="code">WPA-011</span><h3>Cabeceras de seguridad HTTP recomendadas ausentes</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Cabeceras HTTP · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>Las cabeceras de seguridad reducen el impacto de ataques como clickjacking, MIME sniffing, fuga de referrer y XSS. Faltan: Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy.</p>
+      <h4>Impacto</h4><p>Menor defensa en profundidad frente a ataques en el navegador del visitante.</p>
+      <h4>Evidencia</h4><pre class="ev">Ausente: Content-Security-Policy
+Ausente: X-Frame-Options
+Ausente: X-Content-Type-Options
+Ausente: Referrer-Policy
+Ausente: Permissions-Policy</pre>
+      <h4>Recomendación</h4><p>Añada las cabeceras ausentes en el servidor web. Para CSP, empiece en modo Content-Security-Policy-Report-Only y ajuste según los recursos de su tema/plugins.</p>
+      <h4>Corrección sugerida: adáptala y pruébala antes de producción</h4>
+      <div class="codebox"><button class="copy" type="button">Copiar</button><pre class="fix"># Apache (.htaccess o vhost)
+&lt;IfModule mod_headers.c&gt;
+  Header always set Strict-Transport-Security &#34;max-age=31536000; includeSubDomains&#34;
+  Header always set X-Content-Type-Options &#34;nosniff&#34;
+  Header always set X-Frame-Options &#34;SAMEORIGIN&#34;
+  Header always set Referrer-Policy &#34;strict-origin-when-cross-origin&#34;
+  Header always set Permissions-Policy &#34;geolocation=(), microphone=(), camera=()&#34;
+&lt;/IfModule&gt;
+
+# Nginx (bloque server)
+add_header Strict-Transport-Security &#34;max-age=31536000; includeSubDomains&#34; always;
+add_header X-Content-Type-Options &#34;nosniff&#34; always;
+add_header X-Frame-Options &#34;SAMEORIGIN&#34; always;
+add_header Referrer-Policy &#34;strict-origin-when-cross-origin&#34; always;
+add_header Permissions-Policy &#34;geolocation=(), microphone=(), camera=()&#34; always;</pre></div>
+      <h4>Referencias</h4><ul><li><a href="https://owasp.org/www-project-secure-headers/" rel="noopener noreferrer">https://owasp.org/www-project-secure-headers/</a></li><li><a href="https://developer.mozilla.org/docs/Web/HTTP/CSP" rel="noopener noreferrer">https://developer.mozilla.org/docs/Web/HTTP/CSP</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-low" data-sev="low" >
+    <summary><span class="badge s-low">Baja</span><span class="code">WPA-012</span><h3>Scripts de terceros sin Subresource Integrity (SRI)</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Cadena de suministro · Esfuerzo medio · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>Se cargan scripts externos sin verificación de integridad; si el proveedor se compromete, su sitio ejecutará código malicioso.</p>
+      
+      <h4>Evidencia</h4><pre class="ev">cdn.example.net</pre>
+      <h4>Recomendación</h4><p>Añada atributos integrity/crossorigin a scripts estáticos de terceros o aloje una copia propia.</p>
+      
+      <h4>Referencias</h4><ul><li><a href="https://developer.mozilla.org/docs/Web/Security/Subresource_Integrity" rel="noopener noreferrer">https://developer.mozilla.org/docs/Web/Security/Subresource_Integrity</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-low" data-sev="low" >
+    <summary><span class="badge s-low">Baja</span><span class="code">WPA-013</span><h3>La REST API refleja el Origin y permite credenciales (comportamiento estándar de WordPress)</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Configuración del servidor · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>El endpoint /wp-json/ devuelve Access-Control-Allow-Origin igual al Origin recibido y Allow-Credentials: true. Es el comportamiento por defecto del núcleo de WordPress; las acciones autenticadas por cookie exigen además un nonce, por lo que no permite leer datos de un usuario desde otro sitio. Se informa como endurecimiento opcional.</p>
+      
+      <h4>Evidencia</h4><pre class="ev">GET /wp-json/ con Origin: https://evil.example → ACAO: https://evil.example, ACAC: true</pre>
+      <h4>Recomendación</h4><p>Si no usa la REST API desde otros dominios, restrinja los orígenes permitidos con el filtro rest_pre_serve_request o desde el servidor/CDN.</p>
+      
+      <h4>Referencias</h4><ul><li><a href="https://developer.wordpress.org/rest-api/" rel="noopener noreferrer">https://developer.wordpress.org/rest-api/</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-low" data-sev="low" >
+    <summary><span class="badge s-low">Baja</span><span class="code">WPA-014</span><h3>Métodos HTTP innecesarios habilitados</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Configuración del servidor · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>El servidor anuncia métodos que normalmente no se usan en un sitio web.</p>
+      
+      <h4>Evidencia</h4><pre class="ev">Allow: GET,POST,OPTIONS,TRACE,PUT</pre>
+      <h4>Recomendación</h4><p>Deshabilite métodos no necesarios (TRACE, PUT, DELETE, CONNECT).</p>
+      
+      <h4>Referencias</h4><ul><li><a href="https://owasp.org/www-project-web-security-testing-guide/" rel="noopener noreferrer">https://owasp.org/www-project-web-security-testing-guide/</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-low" data-sev="low" >
+    <summary><span class="badge s-low">Baja</span><span class="code">WPA-015</span><h3>El servidor divulga versiones de software</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Divulgación de información · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>Las cabeceras revelan tecnología y versiones exactas, facilitando la búsqueda de vulnerabilidades específicas.</p>
+      
+      <h4>Evidencia</h4><pre class="ev">Server: Apache/2.4.29 (Ubuntu) Python/3.13.18
+X-Powered-By: PHP/7.4.3</pre>
+      <h4>Recomendación</h4><p>Oculte versiones: ServerTokens Prod / server_tokens off / expose_php = Off.</p>
+      <h4>Corrección sugerida: adáptala y pruébala antes de producción</h4>
+      <div class="codebox"><button class="copy" type="button">Copiar</button><pre class="fix"># Apache
+ServerTokens Prod
+ServerSignature Off
+
+# Nginx
+server_tokens off;
+
+# php.ini
+expose_php = Off</pre></div>
+      <h4>Referencias</h4><ul><li><a href="https://owasp.org/www-project-web-security-testing-guide/" rel="noopener noreferrer">https://owasp.org/www-project-web-security-testing-guide/</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-low" data-sev="low" >
+    <summary><span class="badge s-low">Baja</span><span class="code">WPA-016</span><h3>Los readme.txt de los plugins son accesibles públicamente</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Divulgación de información · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>Los archivos readme.txt permiten a cualquiera conocer qué plugins y qué versiones exactas se usan.</p>
+      
+      <h4>Evidencia</h4><pre class="ev">/wp-content/plugins/contact-form-7/readme.txt</pre>
+      <h4>Recomendación</h4><p>Bloquee el acceso a readme.txt/changelog en wp-content/plugins desde el servidor web.</p>
+      <h4>Corrección sugerida: adáptala y pruébala antes de producción</h4>
+      <div class="codebox"><button class="copy" type="button">Copiar</button><pre class="fix"># Nginx
+location ~* ^/wp-content/plugins/.+/(readme|changelog)\.(txt|md)$ { deny all; }
+
+# Apache
+&lt;FilesMatch &#34;^(readme|changelog)\.(txt|md)$&#34;&gt;
+  Require all denied
+&lt;/FilesMatch&gt;</pre></div>
+      <h4>Referencias</h4><ul><li><a href="https://developer.wordpress.org/advanced-administration/security/hardening/" rel="noopener noreferrer">https://developer.wordpress.org/advanced-administration/security/hardening/</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-low" data-sev="low" >
+    <summary><span class="badge s-low">Baja</span><span class="code">WPA-017</span><h3>La versión de WordPress es visible públicamente</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Divulgación de información · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>Conocer la versión exacta permite a un atacante buscar exploits específicos. No es una vulnerabilidad por sí sola, pero facilita el reconocimiento.</p>
+      
+      <h4>Evidencia</h4><pre class="ev">Meta generator en la portada: WordPress 5.0.3
+/readme.html accesible (versión 5.0.3)</pre>
+      <h4>Recomendación</h4><p>Elimine el meta generator, bloquee readme.html/license.txt y mantenga WordPress actualizado.</p>
+      <h4>Corrección sugerida: adáptala y pruébala antes de producción</h4>
+      <div class="codebox"><button class="copy" type="button">Copiar</button><pre class="fix">// functions.php (o plugin de ajustes)
+remove_action(&#39;wp_head&#39;, &#39;wp_generator&#39;);
+add_filter(&#39;the_generator&#39;, &#39;__return_empty_string&#39;);
+
+# Apache: bloquear archivos informativos
+&lt;FilesMatch &#34;^(readme\.html|license\.txt)$&#34;&gt;
+  Require all denied
+&lt;/FilesMatch&gt;</pre></div>
+      <h4>Referencias</h4><ul><li><a href="https://developer.wordpress.org/advanced-administration/security/hardening/" rel="noopener noreferrer">https://developer.wordpress.org/advanced-administration/security/hardening/</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-low" data-sev="low" >
+    <summary><span class="badge s-low">Baja</span><span class="code">WPA-018</span><h3>Cookies sin atributos de seguridad</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Sesiones y cookies · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>Algunas cookies no usan Secure, HttpOnly o SameSite, lo que facilita su robo o uso en ataques CSRF/XSS.</p>
+      
+      <h4>Evidencia</h4><pre class="ev">Cookie &#39;sessid&#39; sin: HttpOnly, SameSite</pre>
+      <h4>Recomendación</h4><p>Configure los atributos en el servidor, plugin de caché o aplicación que emite la cookie.</p>
+      
+      <h4>Referencias</h4><ul><li><a href="https://owasp.org/www-project-web-security-testing-guide/" rel="noopener noreferrer">https://owasp.org/www-project-web-security-testing-guide/</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-low" data-sev="low" >
+    <summary><span class="badge s-low">Baja</span><span class="code">WPA-019</span><h3>wp-cron.php accesible públicamente</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Superficie de ataque · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>Cada visita puede disparar wp-cron.php; llamarlo masivamente consume recursos (DoS de bajo costo).</p>
+      
+      <h4>Evidencia</h4><pre class="ev">GET /wp-cron.php → HTTP 200</pre>
+      <h4>Recomendación</h4><p>Desactive el cron por visita y programe una tarea real del sistema cada 5–15 minutos.</p>
+      <h4>Corrección sugerida: adáptala y pruébala antes de producción</h4>
+      <div class="codebox"><button class="copy" type="button">Copiar</button><pre class="fix">// wp-config.php
+define(&#39;DISABLE_WP_CRON&#39;, true);
+
+# crontab
+*/10 * * * * curl -s https://SU-SITIO/wp-cron.php?doing_wp_cron &gt;/dev/null 2&gt;&amp;1</pre></div>
+      <h4>Referencias</h4><ul><li><a href="https://developer.wordpress.org/advanced-administration/security/hardening/" rel="noopener noreferrer">https://developer.wordpress.org/advanced-administration/security/hardening/</a></li></ul>
+    </div>
+  </details>
+  
+  <details class="finding f-info" data-sev="info" >
+    <summary><span class="badge s-info">Informativa</span><span class="code">WPA-020</span><h3>No existe security.txt</h3></summary>
+    <div class="fbody">
+      <div class="fmeta">Gobernanza · Esfuerzo bajo · Fuente: wpaudit</div>
+      <h4>Descripción</h4><p>No hay un canal publicado (RFC 9116) para que investigadores reporten vulnerabilidades de forma responsable.</p>
+      
+      
+      <h4>Recomendación</h4><p>Publique /.well-known/security.txt con un contacto de seguridad.</p>
+      <h4>Corrección sugerida: adáptala y pruébala antes de producción</h4>
+      <div class="codebox"><button class="copy" type="button">Copiar</button><pre class="fix">Contact: mailto:seguridad@su-dominio.com
+Expires: 2027-12-31T23:59:59Z
+Preferred-Languages: es, en</pre></div>
+      <h4>Referencias</h4><ul><li><a href="https://www.rfc-editor.org/rfc/rfc9116" rel="noopener noreferrer">https://www.rfc-editor.org/rfc/rfc9116</a></li></ul>
+    </div>
+  </details>
+  
+  <div class="empty" id="empty">Ningún hallazgo coincide con la búsqueda.</div>
+  
+  
+</section>
+
+<section id="cobertura">
+  <h2>Cobertura</h2>
+  <p class="lead">Qué se pudo comprobar en esta ejecución. Lo no evaluado no significa que esté bien.</p>
+  <div class="tablewrap"><table><tr><th>Área</th><th>Estado</th><th>Detalle</th></tr>
+  <tr><td>Versiones (api.wordpress.org)</td><td class="st-warn">No evaluada</td><td>Sin acceso a api.wordpress.org: verifique manualmente el núcleo, los plugins y los temas.</td></tr><tr><td>Vulnerabilidades conocidas (CVE)</td><td class="st-warn">No evaluada</td><td>Requiere WPScan con token: los plugins pueden tener fallos publicados que este informe no muestra.</td></tr></table></div>
+  <h3 style="margin-top:20px">Herramientas ejecutadas</h3>
+  <div class="tablewrap"><table><tr><th>Herramienta</th><th>Estado</th><th>Duración</th><th>Notas</th></tr>
+  <tr><td>Motor de wpaudit</td><td class="st-ok">ok</td><td>—</td><td>75 peticiones</td></tr>
+  </table></div>
+</section>
+
+<section id="tecnologia">
+  <h2>Tecnología detectada</h2>
+  <div class="tablewrap"><table>
+    <tr><td class="k">WordPress</td><td>5.0.3</td></tr>
+    <tr><td class="k">PHP</td><td>7.4.3</td></tr>
+    <tr><td class="k">Servidor</td><td>Apache/2.4.29 (Ubuntu) Python/3.13.18</td></tr>
+    <tr><td class="k">Alojamiento</td><td>No identificado</td></tr>
+    <tr><td class="k">CDN o WAF</td><td>No detectado</td></tr>
+    <tr><td class="k">Usuarios expuestos</td><td>admin, ana</td></tr>
+    <tr><td class="k">Hosts de terceros</td><td>cdn.example.net, insecure.example.org</td></tr>
+  </table></div>
+  <h3 style="margin-top:20px">Plugins</h3>
+  <div class="tablewrap"><table><tr><th>Plugin</th><th>Instalada</th><th>Última</th><th>Actualizado</th><th>Estado</th></tr>
+  <tr><td>contact-form-7</td><td>5.1</td><td>—</td><td>—</td><td class="st-warn">No verificado</td></tr></table></div>
+  <h3 style="margin-top:20px">Temas</h3>
+  <div class="tablewrap"><table><tr><th>Tema</th><th>Instalada</th><th>Última</th><th>Estado</th></tr>
+  <tr><td>twentytwenty</td><td>1.0</td><td>—</td><td class="st-warn">No verificado</td></tr></table></div>
+  
+  
+</section>
+
+<section id="tls">
+  <h2>HTTPS y TLS</h2>
+  <p class="lead">No se analizó TLS porque el sitio no usa HTTPS o el puerto no fue accesible.</p>
+</section>
+
+<section id="cabeceras">
+  <h2>Cabeceras HTTP</h2>
+  <div class="tablewrap"><table><tr><th>Cabecera</th><th>Valor</th><th>Estado</th></tr>
+  <tr><td>Content-Security-Policy</td><td>—</td><td class="st-bad">Ausente</td></tr><tr><td>X-Frame-Options</td><td>—</td><td class="st-bad">Ausente</td></tr><tr><td>X-Content-Type-Options</td><td>—</td><td class="st-bad">Ausente</td></tr><tr><td>Referrer-Policy</td><td>—</td><td class="st-bad">Ausente</td></tr><tr><td>Permissions-Policy</td><td>—</td><td class="st-bad">Ausente</td></tr></table></div>
+</section>
+
+<section id="metodo">
+  <h2>Metodología y límites</h2>
+  <div class="tablewrap"><table>
+    <tr><td class="k">Objetivo</td><td>http://127.0.0.1:8099</td></tr>
+    <tr><td class="k">Inicio y fin</td><td>2026-11-05 12:38:26 a 2026-11-05 12:38:45</td></tr>
+    <tr><td class="k">Peticiones HTTP</td><td>75</td></tr>
+    <tr><td class="k">Referencias</td><td>OWASP WSTG, OWASP Top 10, OWASP Secure Headers y guía de hardening de WordPress.</td></tr>
+  </table></div>
+  <ul style="margin-top:14px;padding-left:20px">
+    <li>No se hizo fuerza bruta ni se probaron límites de login: verifica 2FA, bloqueo de intentos y WAF manualmente.</li>
+    <li>No se explotaron vulnerabilidades ni se inició sesión: no se evaluó el área de administración, los roles ni el código a medida.</li>
+    <li>Las versiones de plugins dependen de archivos públicos y pueden ser inexactas.</li>
+    
+  </ul>
+</section>
+<div class="foot">Generado por wpaudit 1.2.0 el 05/11/2026 12:38. Pruebas no intrusivas dentro del alcance autorizado. La ausencia de hallazgos no garantiza la ausencia de vulnerabilidades.</div>
+</main>
+</div>
+</div>
+
+<script>(function () {
+  document.documentElement.classList.add("js");
+  var findings = Array.prototype.slice.call(document.querySelectorAll(".finding"));
+  var chips = Array.prototype.slice.call(document.querySelectorAll(".chip"));
+  var search = document.getElementById("q");
+  var shown = document.getElementById("shown");
+  var empty = document.getElementById("empty");
+  var active = "all";
+
+  function apply() {
+    var query = search ? search.value.trim().toLowerCase() : "";
+    var count = 0;
+    findings.forEach(function (f) {
+      var match = (active === "all" || f.dataset.sev === active) && f.textContent.toLowerCase().indexOf(query) !== -1;
+      f.hidden = !match;
+      if (match) count++;
+    });
+    if (shown) shown.textContent = "Mostrando " + count + " de " + findings.length + " hallazgos";
+    if (empty) empty.style.display = count ? "none" : "block";
+  }
+
+  chips.forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      active = chip.dataset.sev;
+      chips.forEach(function (c) { c.setAttribute("aria-pressed", String(c === chip)); });
+      apply();
+    });
+  });
+  if (search) search.addEventListener("input", apply);
+
+  function setAll(open) { findings.forEach(function (f) { f.open = open; }); }
+  var expand = document.getElementById("expand");
+  var collapse = document.getElementById("collapse");
+  if (expand) expand.addEventListener("click", function () { setAll(true); });
+  if (collapse) collapse.addEventListener("click", function () { setAll(false); });
+
+  var wasOpen = [];
+  window.addEventListener("beforeprint", function () {
+    wasOpen = findings.map(function (f) { return f.open; });
+    findings.forEach(function (f) { f.hidden = false; f.open = true; });
+  });
+  window.addEventListener("afterprint", function () {
+    findings.forEach(function (f, i) { f.open = wasOpen[i]; });
+    apply();
+  });
+
+  document.querySelectorAll(".copy").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var code = button.parentNode.querySelector("pre").textContent;
+      function done() {
+        button.textContent = "Copiado";
+        setTimeout(function () { button.textContent = "Copiar"; }, 1500);
+      }
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(code).then(done, function () { button.textContent = "Selecciona y copia"; });
+      } else {
+        button.textContent = "Selecciona y copia";
+      }
+    });
+  });
+
+  var links = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
+  if (links.length && "IntersectionObserver" in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          links.forEach(function (l) { l.classList.toggle("on", l.getAttribute("href") === "#" + entry.target.id); });
+        }
+      });
+    }, { rootMargin: "-20% 0px -70% 0px" });
+    document.querySelectorAll("section[id]").forEach(function (s) { observer.observe(s); });
+  }
+  apply();
+})();
+</script>
+</body>
+</html>
