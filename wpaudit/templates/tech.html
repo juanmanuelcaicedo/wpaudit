@@ -121,7 +121,7 @@
   <ul style="margin-top:14px;padding-left:20px">
     <li>No se hizo fuerza bruta ni se probaron límites de login: verifica 2FA, bloqueo de intentos y WAF manualmente.</li>
     <li>No se explotaron vulnerabilidades ni se inició sesión: no se evaluó el área de administración, los roles ni el código a medida.</li>
-    <li>Las versiones de plugins dependen de archivos públicos y pueden ser inexactas.</li>
+    <li>El inventario incluye los plugins visibles en el sitio, una lista corta de plugins comunes y los que encuentre WPScan: puede haber otros instalados. Sus versiones dependen de archivos públicos y pueden ser inexactas.</li>
     {% for n in notes %}<li>{{ n }}</li>{% endfor %}
   </ul>
 </section>

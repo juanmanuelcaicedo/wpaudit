@@ -624,6 +624,36 @@ def _lookup_or_gap(ctx: Ctx, fn, slug: str):
         return False, None
 
 
+# Plugins comunes o con historial de fallos graves que no siempre aparecen en el HTML público.
+COMMON_PLUGINS = (
+    "advanced-custom-fields", "akismet", "all-in-one-wp-migration", "all-in-one-wp-security-and-firewall",
+    "backwpup", "better-wp-security", "contact-form-7", "duplicator", "easy-wp-smtp", "elementor",
+    "essential-addons-for-elementor-lite", "file-manager", "iwp-client", "jetpack", "js_composer", "LayerSlider",
+    "litespeed-cache", "loginizer", "mailchimp-for-wp", "nextgen-gallery", "ninja-forms", "really-simple-ssl",
+    "redirection", "revslider", "social-warfare", "sucuri-scanner", "tablepress", "updraftplus", "w3-total-cache",
+    "woocommerce", "wordfence", "wordpress-seo", "wp-advanced-search", "wp-fastest-cache", "wp-file-manager",
+    "wp-file-upload", "wp-super-cache", "wp-time-capsule", "wpforms-lite",
+)
+
+
+def readme_version(text: str) -> str | None:
+    """Versión de un readme.txt: usa Stable tag y, si dice trunk, la primera entrada del changelog."""
+    m = re.search(r"^\s*Stable tag:\s*[\"']?v?(\d[\w.\-]*)", text, re.I | re.M)
+    if m:
+        return m.group(1)
+    changelog = re.split(r"^==\s*Changelog\s*==", text, maxsplit=1, flags=re.I | re.M)
+    if len(changelog) == 2:
+        m = re.search(r"^=+\s*v?(\d+(?:\.\d+)+)", changelog[1], re.M)
+        if m:
+            return m.group(1)
+    return None
+
+
+def _is_plugin_readme(ctx: Ctx, r) -> bool:
+    return (r is not None and r.status_code == 200 and not ctx.is_soft404(r)
+            and bool(re.search(r"^===.+===|^\s*Stable tag:", r.text, re.I | re.M)))
+
+
 def enum_components(ctx: Ctx) -> None:
     if not ctx.is_wp:
         return
@@ -632,15 +662,20 @@ def enum_components(ctx: Ctx) -> None:
     theme_slugs = sorted(set(re.findall(r"/wp-content/themes/([A-Za-z0-9_.\-]+)/", blob)))[:6]
     plugins, themes, readme_exposed = [], [], []
     today = dt.date.today()
+    readmes = {}
+    for slug in COMMON_PLUGINS:
+        if slug not in plugin_slugs:
+            r = ctx.c.get(f"/wp-content/plugins/{slug}/readme.txt")
+            if _is_plugin_readme(ctx, r):
+                readmes[slug] = r
+                plugin_slugs.append(slug)
 
     for slug in plugin_slugs:
         item = {"slug": slug, "version": None, "latest": None, "status": "Desconocido",
                 "last_updated": None, "installs": None}
-        r = ctx.c.get(f"/wp-content/plugins/{slug}/readme.txt")
+        r = readmes.get(slug) or ctx.c.get(f"/wp-content/plugins/{slug}/readme.txt")
         if r is not None and r.status_code == 200 and not ctx.is_soft404(r):
-            m = re.search(r"^\s*Stable tag:\s*([\w.\-]+)", r.text, re.I | re.M)
-            if m and m.group(1).lower() != "trunk":
-                item["version"] = m.group(1)
+            item["version"] = readme_version(r.text)
             readme_exposed.append(f"/wp-content/plugins/{slug}/readme.txt")
         if not item["version"]:
             vs = [v for v in re.findall(rf"/plugins/{re.escape(slug)}/[^\"'\s]*?\?ver=([\d.]+)", blob)
@@ -1100,7 +1135,7 @@ def run_builtin(ctx: Ctx, log) -> None:
             ctx.r.cover(name, "no evaluada", "Error interno de la comprobación.")
     if ctx.c.limited or ctx.c.failed:
         ctx.r.cover("Respuestas del servidor", "parcial",
-                    f"{ctx.c.limited} respuestas 429/5xx y {ctx.c.failed} peticiones sin respuesta: un WAF o el hosting pudo ocultar hallazgos.")
+                    f"Respuestas 429/5xx: {ctx.c.limited}; peticiones sin respuesta: {ctx.c.failed}: un WAF o el hosting pudo ocultar hallazgos.")
     if ctx.c.tls_problem:
         ctx.r.add(Finding(
             id="TLS-CERT", title="Certificado TLS inválido o no confiable", severity="high", category="Transporte",

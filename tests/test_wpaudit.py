@@ -171,3 +171,35 @@ def test_clean_site_report_renders(tmp_path):
     write_reports(result, tmp_path, want_pdf=False)
     html = (tmp_path / "informe_ejecutivo.html").read_text(encoding="utf-8")
     assert "Control confirmado" in html and "No se identificaron riesgos" in html
+
+
+def test_readme_version_uses_changelog_when_stable_tag_is_trunk():
+    assert checks.readme_version("Stable tag: 2.1\n") == "2.1"
+    assert checks.readme_version('Stable tag: "trunk"\n== Changelog ==\n= 4.12.2 =\n') == "4.12.2"
+    assert checks.readme_version("Stable tag: trunk\n== Changelog ==\n= 1.9.4.4 - Dec 17th 2019 =\n") == "1.9.4.4"
+    assert checks.readme_version("Stable tag: trunk\n") is None
+
+
+def test_common_plugin_hidden_from_html_is_found_by_its_readme(custom_site, tmp_path):
+    def respond(path):
+        if path == "/":
+            return 200, {}, '<meta name="generator" content="WordPress 6.0"><a href="/wp-content/themes/t/a.css">x</a>'
+        if path.startswith("/wp-content/plugins/iwp-client/readme.txt"):
+            return 200, {}, "=== InfiniteWP Client ===\nStable tag: trunk\n== Changelog ==\n= 1.9.4.4 =\n"
+        return 404, {}, "not found"
+    main([custom_site(respond), *BASE, "-o", str(tmp_path)])
+    plugins = {p["slug"]: p for p in only_report(tmp_path)["meta"]["plugins"]}
+    assert set(plugins) == {"iwp-client"} and plugins["iwp-client"]["version"] == "1.9.4.4"
+
+
+def test_wpscan_only_plugins_join_the_inventory():
+    result = AuditResult("https://x", "x", "2026-01-01T00:00:00")
+    result.meta["plugins"] = [{"slug": "a", "status": "Al día"}]
+    external.merge_wpscan_plugins(result, {"plugins": {"a": {}, "b": {"version": {"number": "1.0"}}}})
+    assert [(p["slug"], p.get("version")) for p in result.meta["plugins"]] == [("a", None), ("b", "1.0")]
+
+
+def test_sslscan_is_reported_as_skipped_on_http(tmp_path):
+    result = AuditResult("http://127.0.0.1", "127.0.0.1", "2026-01-01T00:00:00")
+    external.run_external(result, "http://127.0.0.1", ["sslscan"], tmp_path, None, 5, lambda _m: None)
+    assert result.tool_runs[0]["status"] == "omitida"

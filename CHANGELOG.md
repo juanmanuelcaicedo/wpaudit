@@ -1,5 +1,13 @@
 # Cambios
 
+## 1.2.1
+
+- Detecta plugins comunes que no aparecen en el HTML público, revisando su `readme.txt`.
+- Obtiene la versión desde el changelog cuando `Stable tag` dice `trunk`.
+- Agrega al inventario los plugins que solo encontró WPScan.
+- Indica que SSLScan se omitió en sitios HTTP.
+- Los mensajes recomiendan configurar el token con `WPSCAN_API_TOKEN`.
+
 ## 1.2.0
 
 - Informes rediseñados para pantalla, celular y PDF, con modo oscuro, filtros, búsqueda y botón para copiar correcciones.

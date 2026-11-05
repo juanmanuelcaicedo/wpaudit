@@ -136,6 +136,16 @@ def run_sslscan(host: str, port: int, result: AuditResult, raw: Path, timeout: i
     _log_run(result, "sslscan", "ok" if rc == 0 else f"rc={rc}", " ".join(cmd), secs)
 
 
+def merge_wpscan_plugins(result: AuditResult, data: dict) -> None:
+    """Agrega al inventario los plugins que solo encontró WPScan."""
+    plugins = result.meta.setdefault("plugins", [])
+    known = {p["slug"] for p in plugins}
+    for slug, info in (data.get("plugins") or {}).items():
+        if slug not in known:
+            plugins.append({"slug": slug, "version": (info.get("version") or {}).get("number"), "latest": None,
+                            "status": "Detectado por WPScan", "last_updated": None, "installs": None})
+
+
 def run_wpscan(url: str, token: str | None, result: AuditResult, raw: Path, timeout: int, light: bool = False) -> None:
     exe = shutil.which("wpscan")
     if not exe:
@@ -175,7 +185,7 @@ def run_wpscan(url: str, token: str | None, result: AuditResult, raw: Path, time
         # La API rechazó el token (inválido, vencido o de ejemplo): reintentar sin token en lugar de perder el análisis
         result.note("WPScan rechazó el token de API (HTTP 401): es inválido, está vencido o es un valor de ejemplo. "
                     "Se repitió el análisis sin token, por lo que NO se consultó la base de vulnerabilidades de plugins/temas. "
-                    "Copie su token real desde https://wpscan.com/profile y use --wpscan-token o WPSCAN_API_TOKEN.")
+                    "Copie su token real desde https://wpscan.com/profile y defina la variable WPSCAN_API_TOKEN.")
         return run_wpscan(url, None, result, raw, timeout, light=light)
     if aborted:
         result.note(f"WPScan abortó el análisis y no aportó resultados: {aborted}")
@@ -228,6 +238,7 @@ def run_wpscan(url: str, token: str | None, result: AuditResult, raw: Path, time
                            + [u for u in (v.get("references") or {}).get("url", [])[:2]],
                 effort="Medio", source="wpscan", evidence=[f"Corregida en: {v.get('fixed_in', 'sin parche conocido')}"]))
 
+    merge_wpscan_plugins(result, data)
     ver = data.get("version") or {}
     if ver:
         add_vulns(f"WordPress {ver.get('number', '')}", ver.get("vulnerabilities"), ver.get("number"))
@@ -256,9 +267,9 @@ def run_wpscan(url: str, token: str | None, result: AuditResult, raw: Path, time
                 effort="Bajo", source="wpscan", evidence=items[:8]))
     note = f"{vulns_total} vulnerabilidades"
     if not token:
-        note += "; sin API token de WPScan solo se detecta lo no dependiente de su base de vulnerabilidades (use --wpscan-token)"
+        note += "; sin API token de WPScan solo se detecta lo no dependiente de su base de vulnerabilidades (defina WPSCAN_API_TOKEN)"
         result.note("WPScan se ejecutó sin API token: las vulnerabilidades de plugins/temas pueden no aparecer. "
-                    "Obtenga un token gratuito en wpscan.com y use --wpscan-token o la variable WPSCAN_API_TOKEN.")
+                    "Obtenga un token en wpscan.com y defina la variable WPSCAN_API_TOKEN.")
     _log_run(result, "wpscan", "ok" if rc in (0, 5) else f"rc={rc}", " ".join(cmd), secs, note)
     if token:
         result.cover("Vulnerabilidades conocidas (CVE)", "completa", "Consultada con WPScan y token de API.")
@@ -373,6 +384,10 @@ def run_external(result: AuditResult, base_url: str, tools: list, out_dir: Path,
         return
     token = wpscan_token or os.environ.get("WPSCAN_API_TOKEN")
     for tool in tools:
+        if tool == "sslscan" and p.scheme != "https":
+            log("[i] Herramienta externa omitida: sslscan (el sitio no usa HTTPS)")
+            _log_run(result, "sslscan", "omitida", note="El sitio no usa HTTPS")
+            continue
         log(f"[+] Herramienta externa: {tool}")
         try:
             if tool == "whatweb":
